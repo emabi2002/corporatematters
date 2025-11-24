@@ -133,13 +133,13 @@ export default function MatterDetailsPage() {
         {/* Header */}
         <div className="flex items-center gap-4">
           <Link href="/matters">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="hover:bg-white/50">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-slate-900">{matter.matter_number}</h1>
-            <p className="text-slate-600 mt-1">{matter.type_of_matter}</p>
+            <h1 className="text-3xl font-bold text-emerald-900">{matter.matter_number}</h1>
+            <p className="text-emerald-700 mt-1">{matter.type_of_matter}</p>
           </div>
           <EditMatterDialog matter={matter} onUpdate={fetchMatter} />
         </div>
