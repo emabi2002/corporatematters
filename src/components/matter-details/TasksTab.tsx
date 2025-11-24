@@ -107,6 +107,7 @@ export function TasksTab({ matterId, matterStatus, onStatusChange }: TasksTabPro
         assigned_officer: assignedOfficer || null,
         due_date: dueDate ? format(dueDate, 'yyyy-MM-dd') : null,
         status: 'Pending',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       if (error) throw error;
@@ -123,11 +124,12 @@ export function TasksTab({ matterId, matterStatus, onStatusChange }: TasksTabPro
       if (matterStatus === 'Pending') {
         await supabase
           .from('corporate_matters')
-          // @ts-ignore - Supabase type inference issue
+          // @ts-expect-error - Supabase type inference issue
           .update({ status: 'In Progress' })
           .eq('id', matterId);
         onStatusChange();
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Error creating task:', error);
       alert(error.message || 'Failed to create task');
@@ -138,6 +140,7 @@ export function TasksTab({ matterId, matterStatus, onStatusChange }: TasksTabPro
 
   const handleUpdateTaskStatus = async (taskId: string, newStatus: string) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updateData: any = { status: newStatus };
       if (newStatus === 'Completed') {
         updateData.completed_at = new Date().toISOString();
@@ -145,7 +148,7 @@ export function TasksTab({ matterId, matterStatus, onStatusChange }: TasksTabPro
 
       const { error } = await supabase
         .from('corporate_matter_tasks')
-        // @ts-ignore - Supabase type inference issue
+        // @ts-expect-error - Supabase type inference issue
         .update(updateData)
         .eq('id', taskId);
 
@@ -165,12 +168,13 @@ export function TasksTab({ matterId, matterStatus, onStatusChange }: TasksTabPro
         if (confirm('All tasks are completed. Mark this matter as Completed?')) {
           await supabase
             .from('corporate_matters')
-            // @ts-ignore - Supabase type inference issue
+            // @ts-expect-error - Supabase type inference issue
             .update({ status: 'Completed' })
             .eq('id', matterId);
           onStatusChange();
         }
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Error updating task:', error);
       alert(error.message || 'Failed to update task');

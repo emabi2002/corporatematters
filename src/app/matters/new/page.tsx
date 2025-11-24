@@ -114,6 +114,7 @@ export default function NewMatterPage() {
 
       const { data, error: insertError } = await supabase
         .from('corporate_matters')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert(matterData as any)
         .select()
         .single();
@@ -122,6 +123,7 @@ export default function NewMatterPage() {
 
       const matter = data as Matter;
       router.push(`/matters/${matter.id}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || 'Failed to create matter');
       console.error('Error creating matter:', err);

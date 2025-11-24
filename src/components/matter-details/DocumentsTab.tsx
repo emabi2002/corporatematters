@@ -107,6 +107,7 @@ export function DocumentsTab({ matterId }: DocumentsTabProps) {
           file_size: file.size,
           mime_type: file.type,
           uploaded_by: user?.id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any);
 
       if (insertError) throw insertError;
@@ -117,6 +118,7 @@ export function DocumentsTab({ matterId }: DocumentsTabProps) {
       setDocType('');
       setDialogOpen(false);
       fetchDocuments();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Error uploading document:', error);
       alert(error.message || 'Failed to upload document');

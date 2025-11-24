@@ -42,7 +42,7 @@ export function EditMatterDialog({ matter, onUpdate }: EditMatterDialogProps) {
     try {
       const { error } = await supabase
         .from('corporate_matters')
-        // @ts-ignore - Supabase type inference issue
+        // @ts-expect-error - Supabase type inference issue
         .update({ status })
         .eq('id', matter.id);
 
@@ -50,6 +50,7 @@ export function EditMatterDialog({ matter, onUpdate }: EditMatterDialogProps) {
 
       setOpen(false);
       onUpdate();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Error updating matter:', error);
       alert(error.message || 'Failed to update matter');
