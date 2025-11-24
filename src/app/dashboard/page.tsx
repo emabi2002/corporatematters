@@ -132,11 +132,13 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-            <p className="text-slate-600 mt-1">Overview of all corporate matters</p>
+            <h1 className="text-3xl font-bold text-emerald-900">Dashboard</h1>
+            <p className="text-emerald-700 mt-1">Overview of all corporate matters</p>
           </div>
           <Link href="/matters/new">
-            <Button size="lg">Register New Matter</Button>
+            <Button size="lg" className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg">
+              Register New Matter
+            </Button>
           </Link>
         </div>
 
@@ -194,9 +196,11 @@ export default function DashboardPage() {
           <CardContent>
             {recentMatters.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-slate-600">No matters registered yet</p>
+                <p className="text-emerald-700">No matters registered yet</p>
                 <Link href="/matters/new">
-                  <Button className="mt-4">Register First Matter</Button>
+                  <Button className="mt-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg">
+                    Register First Matter
+                  </Button>
                 </Link>
               </div>
             ) : (
@@ -205,7 +209,7 @@ export default function DashboardPage() {
                   <Link
                     key={matter.id}
                     href={`/matters/${matter.id}`}
-                    className="block p-4 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors"
+                    className="block p-4 rounded-lg border border-emerald-200 hover:border-emerald-300 hover:bg-white/50 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
