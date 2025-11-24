@@ -123,11 +123,13 @@ export default function MattersPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Corporate Matters</h1>
-            <p className="text-slate-600 mt-1">Manage all corporate legal matters</p>
+            <h1 className="text-3xl font-bold text-emerald-900">Corporate Matters</h1>
+            <p className="text-emerald-700 mt-1">Manage all corporate legal matters</p>
           </div>
           <Link href="/matters/new">
-            <Button size="lg">Register New Matter</Button>
+            <Button size="lg" className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg">
+              Register New Matter
+            </Button>
           </Link>
         </div>
 
@@ -181,7 +183,9 @@ export default function MattersPage() {
                 </p>
                 {!searchTerm && statusFilter === 'all' && (
                   <Link href="/matters/new">
-                    <Button className="mt-4">Register First Matter</Button>
+                    <Button className="mt-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg">
+                      Register First Matter
+                    </Button>
                   </Link>
                 )}
               </div>
