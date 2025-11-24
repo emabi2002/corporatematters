@@ -29,10 +29,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-green-50 to-teal-100">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
+          <p className="mt-4 text-emerald-700">Loading...</p>
         </div>
       </div>
     );
@@ -53,14 +53,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-100">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-gradient-to-r from-emerald-600 to-teal-600 shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo & Title */}
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-slate-900">
+              <h1 className="text-xl font-bold text-white">
                 DLPP Corporate Matters
               </h1>
             </div>
@@ -75,8 +75,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-slate-100 text-slate-900'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-white/20 text-white'
+                        : 'text-emerald-50 hover:bg-white/10 hover:text-white'
                     }`}
                   >
                     {item.name}
@@ -88,13 +88,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2">
-                  <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center">
-                    <span className="text-sm font-medium text-slate-700">
+                <Button variant="ghost" className="flex items-center space-x-2 hover:bg-white/10 text-white">
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/30">
+                    <span className="text-sm font-medium text-white">
                       {profile.full_name?.charAt(0) || profile.email.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <span className="text-sm font-medium hidden sm:block">
+                  <span className="text-sm font-medium hidden sm:block text-white">
                     {profile.full_name || profile.email}
                   </span>
                 </Button>
@@ -121,7 +121,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Mobile Navigation */}
-        <div className="md:hidden border-t border-slate-200">
+        <div className="md:hidden border-t border-white/20">
           <nav className="flex space-x-1 px-4 py-2">
             {navigation.map((item) => {
               const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
@@ -131,8 +131,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   className={`px-3 py-2 rounded-md text-sm font-medium ${
                     isActive
-                      ? 'bg-slate-100 text-slate-900'
-                      : 'text-slate-600 hover:bg-slate-50'
+                      ? 'bg-white/20 text-white'
+                      : 'text-emerald-50 hover:bg-white/10'
                   }`}
                 >
                   {item.name}
