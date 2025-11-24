@@ -137,8 +137,8 @@ export default function NewMatterPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Register New Matter</h1>
-          <p className="text-slate-600 mt-1">Step 2: Register and assign corporate legal matter</p>
+          <h1 className="text-3xl font-bold text-emerald-900">Register New Matter</h1>
+          <p className="text-emerald-700 mt-1">Step 2: Register and assign corporate legal matter</p>
         </div>
 
         <form onSubmit={handleSubmit}>
