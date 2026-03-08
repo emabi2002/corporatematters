@@ -1,0 +1,94 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+
+export default function LoginPage() {
+  const router = useRouter();
+  const { signIn } = useAuth();
+  const [email, setEmail] = useState('corporate@dlpp.gov.pg');
+  const [password, setPassword] = useState('Corporate@2025');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await signIn(email, password);
+      toast.success('Login successful!');
+      router.push('/dashboard');
+      router.refresh();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to login';
+      toast.error(errorMessage);
+      console.error('Login error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #4A4284 0%, #5A5294 100%)' }}>
+      <Card className="w-full max-w-md shadow-2xl">
+        <CardHeader className="space-y-3 pb-6">
+          <div className="flex justify-center mb-2">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
+              <span className="text-white font-bold text-4xl">D</span>
+            </div>
+          </div>
+          <CardTitle className="text-2xl text-center font-bold" style={{ color: '#4A4284' }}>
+            Corporate Matters System
+          </CardTitle>
+          <CardDescription className="text-center text-base">
+            Department of Lands & Physical Planning
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-10"
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="h-10"
+                disabled={loading}
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full h-10 text-white font-semibold hover:opacity-90 transition-opacity"
+              style={{ background: '#EF5A5A' }}
+              disabled={loading}
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
