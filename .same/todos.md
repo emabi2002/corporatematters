@@ -1,5 +1,15 @@
 # DLPP Corporate Matters - Clone Status
 
+## Bug fix (round 4) — Documents & Tasks 404
+- [x] Sidebar linked /documents and /tasks but those routes never existed (404)
+      (Docs/Tasks only existed as tabs inside /matters/[id])
+- [x] Created /documents — global document register (all matters): tiles,
+      search, All/Final/Drafts pills, table w/ matter link + download
+- [x] Created /tasks — global task list (all matters): tiles, search,
+      All/My/Pending/In Progress/Overdue/Completed pills, inline status update
+- [x] tsc 0 errors; both routes compile & return 200; toasts wired (Toaster in layout)
+
+
 ## Done
 - [x] Cloned repo from GitHub (emabi2002/corporatematters)
 - [x] Installed dependencies with Bun (530 packages)
@@ -96,4 +106,10 @@
       - divisions/matter-types/document-types: compact header, emerald btn, p-3 search
       - reference-data: header + 3 compact stat tiles
       - tsc 0 errors; all /admin routes compile & return 200
-- [ ] Commit & push all round 2 + round 3 changes to GitHub (IN PROGRESS)
+- [x] Commit & push all round 2 + round 3 changes to GitHub
+      - .git was wiped again -> reinit, reconnect origin, reset --mixed origin/main
+      - committed a172569 (15 files, +1040/-535); pushed c86e462..a172569 main
+      - added missing src/lib/reference-data.ts so fresh GitHub builds work
+      - removed temp scripts/_introspect_ref.mjs & _probe_exec.mjs
+      - verified: no service-role key in repo, .env.local ignored, token scrubbed from .git/config
+      - SECURITY: advise user to rotate the pasted GitHub PAT (it's now in chat history)
