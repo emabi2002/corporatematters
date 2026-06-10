@@ -5,9 +5,28 @@ import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { createClient } from '@/lib/supabase';
 import { format, formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import {
   Bell,
   Check,
@@ -17,6 +36,9 @@ import {
   AlertCircle,
   Inbox,
   Archive,
+  Plus,
+  RotateCcw,
+  Send,
 } from 'lucide-react';
 import { NOTIFICATION_LABELS } from '@/lib/workflow-constants';
 
@@ -32,20 +54,54 @@ type Notification = {
   created_at: string;
 };
 
+type Recipient = { id: string; full_name: string | null; email: string };
+
+const NOTIFY_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'announcement', label: 'Announcement' },
+  { value: 'reminder', label: 'Reminder' },
+  ...Object.entries(NOTIFICATION_LABELS).map(([value, label]) => ({ value, label })),
+];
+
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const supabase = createClient();
+
+  // Compose dialog state
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [compose, setCompose] = useState({
+    recipientId: 'me',
+    type: 'announcement',
+    title: '',
+    message: '',
+  });
 
   useEffect(() => {
     fetchNotifications();
+    fetchRecipients();
   }, []);
+
+  const fetchRecipients = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .order('full_name');
+      setRecipients((data as Recipient[]) || []);
+    } catch (error) {
+      console.error('Error fetching recipients:', error);
+    }
+  };
 
   const fetchNotifications = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      setCurrentUserId(user.id);
 
       const { data, error } = await supabase
         .from('corporate_notifications')
@@ -60,6 +116,56 @@ export default function NotificationsPage() {
       console.error('Error fetching notifications:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const markAsUnread = async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('corporate_notifications')
+        .update({ is_read: false })
+        .eq('id', notificationId);
+      if (error) throw error;
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, is_read: false } : n))
+      );
+    } catch (error) {
+      console.error('Error marking notification as unread:', error);
+      toast.error('Failed to update notification');
+    }
+  };
+
+  const handleCompose = async () => {
+    if (!compose.title.trim() || !compose.message.trim()) {
+      toast.error('Please enter a title and message');
+      return;
+    }
+    const targetUserId = compose.recipientId === 'me' ? currentUserId : compose.recipientId;
+    if (!targetUserId) {
+      toast.error('Please choose a recipient');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('corporate_notifications').insert({
+        user_id: targetUserId,
+        type: compose.type,
+        title: compose.title.trim(),
+        message: compose.message.trim(),
+        is_read: false,
+      } as never);
+      if (error) throw error;
+      toast.success('Notification sent');
+      setComposeOpen(false);
+      setCompose({ recipientId: 'me', type: 'announcement', title: '', message: '' });
+      // Refresh if it was sent to the current user
+      if (targetUserId === currentUserId) fetchNotifications();
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      const msg = error instanceof Error ? error.message : 'Failed to send notification';
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -217,6 +323,14 @@ export default function NotificationsPage() {
                 Clear read
               </Button>
             )}
+            <Button
+              size="sm"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={() => setComposeOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New
+            </Button>
           </div>
         </div>
 
@@ -340,7 +454,7 @@ export default function NotificationsPage() {
 
                     {/* Actions (reveal on hover) */}
                     <div className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {!notification.is_read && (
+                      {!notification.is_read ? (
                         <Button
                           variant="ghost"
                           size="icon"
@@ -349,6 +463,16 @@ export default function NotificationsPage() {
                           onClick={() => markAsRead(notification.id)}
                         >
                           <Check className="h-3.5 w-3.5" />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-slate-500 hover:text-emerald-700"
+                          title="Mark unread"
+                          onClick={() => markAsUnread(notification.id)}
+                        >
+                          <RotateCcw className="h-3.5 w-3.5" />
                         </Button>
                       )}
                       <Button
@@ -368,6 +492,95 @@ export default function NotificationsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Compose notification dialog */}
+      <Dialog open={composeOpen} onOpenChange={setComposeOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New Notification</DialogTitle>
+            <DialogDescription>Send a notification to yourself or another user.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Recipient</Label>
+                <Select
+                  value={compose.recipientId}
+                  onValueChange={(v) => setCompose((c) => ({ ...c, recipientId: v }))}
+                  disabled={submitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="me">Myself</SelectItem>
+                    {recipients.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.full_name || r.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select
+                  value={compose.type}
+                  onValueChange={(v) => setCompose((c) => ({ ...c, type: v }))}
+                  disabled={submitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NOTIFY_TYPE_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>
+                Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                value={compose.title}
+                onChange={(e) => setCompose((c) => ({ ...c, title: e.target.value }))}
+                placeholder="Notification title"
+                disabled={submitting}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>
+                Message <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                value={compose.message}
+                onChange={(e) => setCompose((c) => ({ ...c, message: e.target.value }))}
+                placeholder="Write your message..."
+                rows={3}
+                disabled={submitting}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setComposeOpen(false)} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={handleCompose}
+              disabled={submitting || !compose.title.trim() || !compose.message.trim()}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              {submitting ? 'Sending...' : 'Send'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

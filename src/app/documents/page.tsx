@@ -2,10 +2,27 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { AppLayout } from '@/components/AppLayout';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { createClient } from '@/lib/supabase';
 import type { Database } from '@/lib/database.types';
 import { format } from 'date-fns';
@@ -19,18 +36,44 @@ import {
   FileCheck,
   FilePen,
   Files,
+  Upload,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
+import { DOCUMENT_TYPES } from '@/lib/constants';
 
 type DocRow = Database['public']['Tables']['corporate_matter_documents']['Row'];
 type MatterLite = { id: string; matter_number: string; subject: string | null };
 
+const NONE = '__none__';
+type Stage = 'none' | 'draft' | 'final';
+
+function stageOf(d: DocRow): Stage {
+  if (d.is_final) return 'final';
+  if (d.is_draft) return 'draft';
+  return 'none';
+}
+
 export default function DocumentsPage() {
   const supabase = createClient();
+  const { user } = useAuth();
   const [documents, setDocuments] = useState<DocRow[]>([]);
   const [matters, setMatters] = useState<Record<string, MatterLite>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'final' | 'draft'>('all');
+
+  // CRUD dialog state
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [editing, setEditing] = useState<DocRow | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    matterId: '',
+    title: '',
+    docType: '',
+    stage: 'none' as Stage,
+    file: null as File | null,
+  });
 
   useEffect(() => {
     fetchData();
@@ -45,7 +88,7 @@ export default function DocumentsPage() {
           .from('corporate_matter_documents')
           .select('*')
           .order('uploaded_at', { ascending: false }),
-        supabase.from('corporate_matters').select('id, matter_number, subject'),
+        supabase.from('corporate_matters').select('id, matter_number, subject').order('matter_number'),
       ]);
       if (docsRes.error) throw docsRes.error;
       setDocuments(docsRes.data || []);
@@ -59,6 +102,108 @@ export default function DocumentsPage() {
       toast.error('Could not load documents');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const mattersList = useMemo(
+    () => Object.values(matters).sort((a, b) => a.matter_number.localeCompare(b.matter_number)),
+    [matters]
+  );
+
+  const openUpload = () => {
+    setEditing(null);
+    setForm({ matterId: '', title: '', docType: '', stage: 'none', file: null });
+    setUploadOpen(true);
+  };
+
+  const openEdit = (doc: DocRow) => {
+    setEditing(doc);
+    setForm({
+      matterId: doc.matter_id,
+      title: doc.title,
+      docType: doc.doc_type || '',
+      stage: stageOf(doc),
+      file: null,
+    });
+    setUploadOpen(true);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] || null;
+    setForm((prev) => ({ ...prev, file: f, title: prev.title || (f?.name ?? '') }));
+  };
+
+  const handleSubmit = async () => {
+    if (editing) {
+      // Update metadata only
+      if (!form.title.trim()) {
+        toast.error('Please enter a title');
+        return;
+      }
+      setSubmitting(true);
+      try {
+        const { error } = await supabase
+          .from('corporate_matter_documents')
+          .update({
+            title: form.title.trim(),
+            doc_type: form.docType || null,
+            is_final: form.stage === 'final',
+            is_draft: form.stage === 'draft',
+          })
+          .eq('id', editing.id);
+        if (error) throw error;
+        toast.success('Document updated');
+        setUploadOpen(false);
+        fetchData();
+      } catch (e) {
+        console.error('Error updating document', e);
+        toast.error('Failed to update document');
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    // Create (upload)
+    if (!form.matterId) {
+      toast.error('Please select a matter');
+      return;
+    }
+    if (!form.file || !form.title.trim()) {
+      toast.error('Please choose a file and enter a title');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const ext = form.file.name.split('.').pop();
+      const path = `${form.matterId}/${Date.now()}.${ext}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('corporate-matters')
+        .upload(path, form.file);
+      if (uploadError) throw uploadError;
+
+      const { error: insertError } = await supabase.from('corporate_matter_documents').insert({
+        matter_id: form.matterId,
+        title: form.title.trim(),
+        doc_type: form.docType || null,
+        storage_path: uploadData.path,
+        file_size: form.file.size,
+        mime_type: form.file.type,
+        uploaded_by: user?.id ?? null,
+        is_final: form.stage === 'final',
+        is_draft: form.stage === 'draft',
+      } as never);
+      if (insertError) throw insertError;
+
+      toast.success('Document uploaded');
+      setUploadOpen(false);
+      fetchData();
+    } catch (e) {
+      console.error('Error uploading document', e);
+      const msg = e instanceof Error ? e.message : 'Failed to upload document';
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -78,6 +223,21 @@ export default function DocumentsPage() {
       URL.revokeObjectURL(url);
     } catch {
       toast.error('This file is not available for download');
+    }
+  };
+
+  const handleDelete = async (doc: DocRow) => {
+    if (!confirm(`Delete "${doc.title}"? This cannot be undone.`)) return;
+    try {
+      // Best-effort storage removal (ignore failures for metadata-only rows)
+      await supabase.storage.from('corporate-matters').remove([doc.storage_path]);
+      const { error } = await supabase.from('corporate_matter_documents').delete().eq('id', doc.id);
+      if (error) throw error;
+      setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+      toast.success('Document deleted');
+    } catch (e) {
+      console.error('Error deleting document', e);
+      toast.error('Failed to delete document');
     }
   };
 
@@ -129,11 +289,17 @@ export default function DocumentsPage() {
     <AppLayout>
       <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Header */}
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-slate-900">Documents</h1>
-          <p className="text-sm text-slate-500">
-            Every document across all matters · {filtered.length} shown
-          </p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-slate-900">Documents</h1>
+            <p className="text-sm text-slate-500">
+              Every document across all matters · {filtered.length} shown
+            </p>
+          </div>
+          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0" onClick={openUpload}>
+            <Upload className="h-4 w-4 mr-2" />
+            Upload Document
+          </Button>
         </div>
 
         {/* Summary tiles */}
@@ -217,6 +383,12 @@ export default function DocumentsPage() {
                 <p className="text-sm text-slate-500">
                   {search || filter !== 'all' ? 'No documents match your filters' : 'No documents yet'}
                 </p>
+                {!search && filter === 'all' && (
+                  <Button size="sm" variant="outline" className="mt-3" onClick={openUpload}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload the first document
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -265,15 +437,35 @@ export default function DocumentsPage() {
                             {format(new Date(doc.uploaded_at), 'MMM dd, yyyy')}
                           </td>
                           <td className="px-3 py-2 text-right">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-slate-500 hover:text-emerald-700"
-                              onClick={() => handleDownload(doc)}
-                              title="Download"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
+                            <div className="flex items-center justify-end gap-0.5">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-slate-500 hover:text-emerald-700"
+                                onClick={() => handleDownload(doc)}
+                                title="Download"
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-slate-500 hover:text-emerald-700"
+                                onClick={() => openEdit(doc)}
+                                title="Edit details"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50"
+                                onClick={() => handleDelete(doc)}
+                                title="Delete"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -285,6 +477,115 @@ export default function DocumentsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Upload / Edit dialog */}
+      <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editing ? 'Edit Document' : 'Upload Document'}</DialogTitle>
+            <DialogDescription>
+              {editing ? 'Update the document details.' : 'Upload a file and link it to a matter.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {!editing && (
+              <>
+                <div className="space-y-2">
+                  <Label>
+                    Matter <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={form.matterId}
+                    onValueChange={(v) => setForm((f) => ({ ...f, matterId: v }))}
+                    disabled={submitting}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a matter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mattersList.map((m) => (
+                        <SelectItem key={m.id} value={m.id}>
+                          {m.matter_number} — {m.subject || 'Untitled'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>
+                    File <span className="text-red-500">*</span>
+                  </Label>
+                  <Input type="file" onChange={handleFileChange} disabled={submitting} />
+                </div>
+              </>
+            )}
+
+            <div className="space-y-2">
+              <Label>
+                Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                value={form.title}
+                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                placeholder="Document title"
+                disabled={submitting}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Document Type</Label>
+                <Select
+                  value={form.docType || NONE}
+                  onValueChange={(v) => setForm((f) => ({ ...f, docType: v === NONE ? '' : v }))}
+                  disabled={submitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>None</SelectItem>
+                    {DOCUMENT_TYPES.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Stage</Label>
+                <Select
+                  value={form.stage}
+                  onValueChange={(v) => setForm((f) => ({ ...f, stage: v as Stage }))}
+                  disabled={submitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Standard</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="final">Final</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUploadOpen(false)} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={handleSubmit}
+              disabled={submitting}
+            >
+              {submitting ? 'Saving...' : editing ? 'Save Changes' : 'Upload'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

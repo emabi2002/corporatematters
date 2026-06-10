@@ -4,8 +4,11 @@ import { useEffect, useState, useMemo } from 'react';
 import { AppLayout } from '@/components/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -13,6 +16,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { DatePicker } from '@/components/DatePicker';
 import { createClient } from '@/lib/supabase';
 import type { Database } from '@/lib/database.types';
 import { format, isBefore, startOfToday } from 'date-fns';
@@ -26,14 +38,20 @@ import {
   X,
   ListTodo,
   AlertTriangle,
+  Plus,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
-import { TASK_STATUS } from '@/lib/constants';
+import { TASK_TYPES, TASK_STATUS } from '@/lib/constants';
+import { PRIORITIES } from '@/lib/workflow-constants';
 
 type Task = Database['public']['Tables']['corporate_matter_tasks']['Row'];
 type MatterLite = { id: string; matter_number: string; subject: string | null };
 type Profile = { id: string; full_name: string | null; email: string };
 
 type QuickFilter = 'all' | 'mine' | 'Pending' | 'In Progress' | 'Completed' | 'overdue';
+
+const NONE = '__none__';
 
 export default function TasksPage() {
   const supabase = createClient();
@@ -44,6 +62,20 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<QuickFilter>('all');
+
+  // CRUD dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<Task | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    matterId: '',
+    taskType: '',
+    description: '',
+    assignedOfficer: '',
+    priority: 'Medium',
+    status: 'Pending',
+    dueDate: undefined as Date | undefined,
+  });
 
   useEffect(() => {
     fetchData();
@@ -58,8 +90,8 @@ export default function TasksPage() {
           .from('corporate_matter_tasks')
           .select('*')
           .order('created_at', { ascending: false }),
-        supabase.from('corporate_matters').select('id, matter_number, subject'),
-        supabase.from('profiles').select('id, full_name, email'),
+        supabase.from('corporate_matters').select('id, matter_number, subject').order('matter_number'),
+        supabase.from('profiles').select('id, full_name, email').order('full_name'),
       ]);
       if (tasksRes.error) throw tasksRes.error;
       setTasks(tasksRes.data || []);
@@ -83,18 +115,110 @@ export default function TasksPage() {
     }
   };
 
+  const mattersList = useMemo(
+    () => Object.values(matters).sort((a, b) => a.matter_number.localeCompare(b.matter_number)),
+    [matters]
+  );
+  const officersList = useMemo(
+    () => Object.values(officers).sort((a, b) => (a.full_name || a.email).localeCompare(b.full_name || b.email)),
+    [officers]
+  );
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm({
+      matterId: '',
+      taskType: '',
+      description: '',
+      assignedOfficer: '',
+      priority: 'Medium',
+      status: 'Pending',
+      dueDate: undefined,
+    });
+    setDialogOpen(true);
+  };
+
+  const openEdit = (task: Task) => {
+    setEditing(task);
+    setForm({
+      matterId: task.matter_id,
+      taskType: task.task_type || '',
+      description: task.description,
+      assignedOfficer: task.assigned_officer || '',
+      priority: task.priority || 'Medium',
+      status: task.status || 'Pending',
+      dueDate: task.due_date ? new Date(task.due_date) : undefined,
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    if (!form.matterId) {
+      toast.error('Please select a matter');
+      return;
+    }
+    if (!form.description.trim()) {
+      toast.error('Please enter a description');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const payload = {
+        matter_id: form.matterId,
+        task_type: form.taskType || null,
+        description: form.description.trim(),
+        assigned_officer: form.assignedOfficer || null,
+        priority: form.priority,
+        status: form.status,
+        due_date: form.dueDate ? format(form.dueDate, 'yyyy-MM-dd') : null,
+        completed_at: form.status === 'Completed' ? new Date().toISOString() : null,
+      };
+
+      if (editing) {
+        const { error } = await supabase
+          .from('corporate_matter_tasks')
+          .update(payload)
+          .eq('id', editing.id);
+        if (error) throw error;
+        toast.success('Task updated');
+      } else {
+        const { error } = await supabase.from('corporate_matter_tasks').insert(payload as never);
+        if (error) throw error;
+        toast.success('Task created');
+      }
+      setDialogOpen(false);
+      fetchData();
+    } catch (e) {
+      console.error('Error saving task', e);
+      const msg = e instanceof Error ? e.message : 'Failed to save task';
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (task: Task) => {
+    if (!confirm('Delete this task? This cannot be undone.')) return;
+    try {
+      const { error } = await supabase.from('corporate_matter_tasks').delete().eq('id', task.id);
+      if (error) throw error;
+      setTasks((prev) => prev.filter((t) => t.id !== task.id));
+      toast.success('Task deleted');
+    } catch (e) {
+      console.error('Error deleting task', e);
+      toast.error('Failed to delete task');
+    }
+  };
+
   const handleUpdateStatus = async (taskId: string, newStatus: string) => {
     try {
       const updateData: Record<string, unknown> = { status: newStatus };
-      if (newStatus === 'Completed') updateData.completed_at = new Date().toISOString();
-      else updateData.completed_at = null;
-
+      updateData.completed_at = newStatus === 'Completed' ? new Date().toISOString() : null;
       const { error } = await supabase
         .from('corporate_matter_tasks')
         .update(updateData)
         .eq('id', taskId);
       if (error) throw error;
-
       setTasks((prev) =>
         prev.map((t) =>
           t.id === taskId
@@ -200,11 +324,17 @@ export default function TasksPage() {
     <AppLayout>
       <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Header */}
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-slate-900">Tasks</h1>
-          <p className="text-sm text-slate-500">
-            Work items across all matters · {filtered.length} shown
-          </p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-slate-900">Tasks</h1>
+            <p className="text-sm text-slate-500">
+              Work items across all matters · {filtered.length} shown
+            </p>
+          </div>
+          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0" onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Task
+          </Button>
         </div>
 
         {/* Summary tiles */}
@@ -288,6 +418,12 @@ export default function TasksPage() {
                 <p className="text-sm text-slate-500">
                   {search || filter !== 'all' ? 'No tasks match your filters' : 'No tasks yet'}
                 </p>
+                {!search && filter === 'all' && (
+                  <Button size="sm" variant="outline" className="mt-3" onClick={openCreate}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create the first task
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
@@ -297,7 +433,7 @@ export default function TasksPage() {
                   return (
                     <div
                       key={task.id}
-                      className="flex items-start gap-3 px-3 py-2.5 hover:bg-slate-50 transition-colors"
+                      className="group flex items-start gap-3 px-3 py-2.5 hover:bg-slate-50 transition-colors"
                     >
                       <div className="mt-0.5 flex-shrink-0">{getStatusIcon(task.status)}</div>
                       <div className="flex-1 min-w-0">
@@ -336,10 +472,7 @@ export default function TasksPage() {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <Badge variant="outline" className={`${getStatusColor(task.status)} hidden sm:inline-flex`}>
-                          {task.status}
-                        </Badge>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
                         <Select
                           value={task.status}
                           onValueChange={(value) => handleUpdateStatus(task.id, value)}
@@ -355,6 +488,24 @@ export default function TasksPage() {
                             ))}
                           </SelectContent>
                         </Select>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-slate-500 hover:text-emerald-700"
+                          title="Edit task"
+                          onClick={() => openEdit(task)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50"
+                          title="Delete task"
+                          onClick={() => handleDelete(task)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   );
@@ -364,6 +515,159 @@ export default function TasksPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Create / Edit dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editing ? 'Edit Task' : 'New Task'}</DialogTitle>
+            <DialogDescription>
+              {editing ? 'Update this task and save your changes.' : 'Create a task and link it to a matter.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>
+                Matter <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={form.matterId}
+                onValueChange={(v) => setForm((f) => ({ ...f, matterId: v }))}
+                disabled={submitting}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a matter" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mattersList.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.matter_number} — {m.subject || 'Untitled'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>
+                Description <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                value={form.description}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                placeholder="Describe the task..."
+                rows={3}
+                disabled={submitting}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Task Type</Label>
+                <Select
+                  value={form.taskType || NONE}
+                  onValueChange={(v) => setForm((f) => ({ ...f, taskType: v === NONE ? '' : v }))}
+                  disabled={submitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>None</SelectItem>
+                    {TASK_TYPES.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Assigned Officer</Label>
+                <Select
+                  value={form.assignedOfficer || NONE}
+                  onValueChange={(v) => setForm((f) => ({ ...f, assignedOfficer: v === NONE ? '' : v }))}
+                  disabled={submitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Unassigned" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>Unassigned</SelectItem>
+                    {officersList.map((o) => (
+                      <SelectItem key={o.id} value={o.id}>
+                        {o.full_name || o.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select
+                  value={form.priority}
+                  onValueChange={(v) => setForm((f) => ({ ...f, priority: v }))}
+                  disabled={submitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(PRIORITIES).map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={form.status}
+                  onValueChange={(v) => setForm((f) => ({ ...f, status: v }))}
+                  disabled={submitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TASK_STATUS.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Due Date</Label>
+                <DatePicker
+                  date={form.dueDate}
+                  onSelect={(d) => setForm((f) => ({ ...f, dueDate: d }))}
+                  placeholder="Select date"
+                  disabled={submitting}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={handleSubmit}
+              disabled={submitting || !form.matterId || !form.description.trim()}
+            >
+              {submitting ? 'Saving...' : editing ? 'Save Changes' : 'Create Task'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

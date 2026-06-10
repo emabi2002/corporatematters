@@ -1,5 +1,13 @@
 # DLPP Corporate Matters - Clone Status
 
+## CRUD on Management pages (round 5)
+- [x] Documents: Upload (matter+file+type+stage), Edit metadata, Delete (+storage), Download
+- [x] Tasks: Create/Edit dialog (matter, type, assignee, priority, status, due date),
+      inline status update, Delete
+- [x] Notifications: Compose (recipient/type/title/message), mark read/unread, delete, clear
+- [x] tsc 0 errors; /documents /tasks /notifications compile & return 200; toasts wired
+
+
 ## Bug fix (round 4) — Documents & Tasks 404
 - [x] Sidebar linked /documents and /tasks but those routes never existed (404)
       (Docs/Tasks only existed as tabs inside /matters/[id])
