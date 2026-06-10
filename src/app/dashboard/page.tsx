@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase';
@@ -17,9 +17,7 @@ import {
   CheckCircle2,
   TrendingUp,
   Users,
-  Calendar,
   Activity,
-  ArrowRight,
   AlertTriangle,
 } from 'lucide-react';
 import {
@@ -27,9 +25,9 @@ import {
   MATTER_STATUS,
   PRIORITIES,
   getWorkflowStageColor,
-  getStatusColor,
   getPriorityColor,
 } from '@/lib/workflow-constants';
+import { cn } from '@/lib/utils';
 
 type Matter = Database['public']['Tables']['corporate_matters']['Row'];
 type ActivityLog = Database['public']['Tables']['corporate_matter_activity_logs']['Row'];
@@ -209,190 +207,97 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="p-6 flex items-center justify-center py-12">
+        <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto"></div>
-            <p className="mt-4 text-slate-700">Loading dashboard...</p>
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mx-auto" />
+            <p className="mt-3 text-sm text-slate-600">Loading dashboard...</p>
           </div>
         </div>
       </AppLayout>
     );
   }
 
+  const activeCount =
+    (stats.byStatus[MATTER_STATUS.OPEN] || 0) + (stats.byStatus[MATTER_STATUS.IN_PROGRESS] || 0);
+
+  const metricTiles = [
+    { label: 'Total Matters', value: stats.total, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'My Assigned', value: stats.myAssigned, icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'Awaiting Action', value: stats.awaitingMyAction, icon: AlertCircle, color: 'text-orange-600', bg: 'bg-orange-50' },
+    { label: 'Completed (mo)', value: stats.completedThisMonth, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50' },
+    { label: 'Overdue', value: stats.overdue, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50' },
+    { label: 'Due in 3 Days', value: stats.dueSoon, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Avg Turnaround', value: stats.avgTurnaroundDays, icon: TrendingUp, color: 'text-teal-600', bg: 'bg-teal-50', suffix: 'd' },
+    { label: 'Active', value: activeCount, icon: Activity, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+  ] as const;
+
+  const attentionItems = [
+    ...overdueMatters.map((m) => ({ matter: m, kind: 'overdue' as const })),
+    ...dueSoonMatters.map((m) => ({ matter: m, kind: 'due' as const })),
+  ].slice(0, 6);
+
   return (
     <AppLayout>
-      <div className="p-6 space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-            <p className="text-slate-600 mt-1">
-              Welcome back, {profile?.full_name || 'User'}
-            </p>
+            <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+            <p className="text-sm text-slate-500">Welcome back, {profile?.full_name || 'User'}</p>
           </div>
           <Link href="/matters/new">
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white">
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
               <FileText className="h-4 w-4 mr-2" />
-              Register New Matter
+              Register Matter
             </Button>
           </Link>
         </div>
 
-        {/* Summary Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Matters */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">Total Matters</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold text-slate-900">{stats.total}</div>
-                <FileText className="h-8 w-8 text-blue-500" />
-              </div>
-              <div className="mt-2 flex items-center text-sm">
-                <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                <span className="text-slate-600">All registered matters</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* My Assigned Matters */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">My Assigned</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold text-purple-600">{stats.myAssigned}</div>
-                <Users className="h-8 w-8 text-purple-500" />
-              </div>
-              <div className="mt-2 text-sm text-slate-600">
-                Assigned to you
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Awaiting My Action */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">Awaiting Action</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold text-orange-600">{stats.awaitingMyAction}</div>
-                <AlertCircle className="h-8 w-8 text-orange-500" />
-              </div>
-              <div className="mt-2 text-sm text-slate-600">
-                Requiring your attention
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Completed This Month */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">Completed</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold text-green-600">{stats.completedThisMonth}</div>
-                <CheckCircle2 className="h-8 w-8 text-green-500" />
-              </div>
-              <div className="mt-2 text-sm text-slate-600">
-                This month
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Overdue Matters */}
-          <Card className="border-2 border-red-200 bg-gradient-to-br from-red-50 to-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-red-700 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                Overdue Matters
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold text-red-600">{stats.overdue}</div>
-                <AlertCircle className="h-8 w-8 text-red-500" />
-              </div>
-              <div className="mt-2 text-sm text-red-600">
-                {stats.overdue > 0 ? 'Requires immediate attention' : 'No overdue matters'}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Due Soon */}
-          <Card className="border-l-4 border-l-yellow-500 bg-yellow-50">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-yellow-800">Due in 3 Days</CardTitle>
-              <Clock className="h-5 w-5 text-yellow-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-yellow-700">{stats.dueSoon}</div>
-              <p className="text-xs text-yellow-600 mt-1">Upcoming deadlines</p>
-            </CardContent>
-          </Card>
-
-          {/* Average Turnaround */}
-          <Card className="border-l-4 border-l-teal-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Avg Turnaround</CardTitle>
-              <TrendingUp className="h-5 w-5 text-teal-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{stats.avgTurnaroundDays}</div>
-              <p className="text-xs text-slate-500 mt-1">Days to complete</p>
-            </CardContent>
-          </Card>
-
-          {/* Active Matters */}
-          <Card className="border-l-4 border-l-indigo-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Active Matters</CardTitle>
-              <Activity className="h-5 w-5 text-indigo-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">
-                {(stats.byStatus[MATTER_STATUS.OPEN] || 0) + (stats.byStatus[MATTER_STATUS.IN_PROGRESS] || 0)}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">Open + In Progress</p>
-            </CardContent>
-          </Card>
+        {/* Metric tiles */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {metricTiles.map((m) => {
+            const Icon = m.icon;
+            return (
+              <Card key={m.label} className="border-slate-200">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500 truncate">{m.label}</p>
+                      <p className="text-2xl font-bold text-slate-900 leading-tight">
+                        {m.value}
+                        {'suffix' in m && m.suffix ? (
+                          <span className="text-base font-semibold text-slate-400 ml-0.5">{m.suffix}</span>
+                        ) : null}
+                      </p>
+                    </div>
+                    <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg flex-shrink-0', m.bg)}>
+                      <Icon className={cn('h-5 w-5', m.color)} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
-        {/* Workflow Stage Breakdown */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-emerald-600" />
-              Workflow Stage Breakdown
-            </CardTitle>
-            <CardDescription>Distribution of matters across workflow stages</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {/* Workflow stage breakdown (compact strip) */}
+        <Card className="border-slate-200">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp className="h-4 w-4 text-emerald-600" />
+              <h2 className="text-sm font-semibold text-slate-700">Workflow Stage Breakdown</h2>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10 gap-2">
               {Object.values(WORKFLOW_STAGES).map((stage) => {
                 const count = stats.byWorkflowStage[stage] || 0;
-                const percentage = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
-
+                const pct = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
                 return (
-                  <div key={stage} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className={getWorkflowStageColor(stage)}>
-                        {count}
-                      </Badge>
-                      <span className="text-xs text-slate-500">{percentage}%</span>
+                  <div key={stage} className="rounded-lg border border-slate-100 bg-slate-50 p-2">
+                    <div className="text-lg font-bold text-slate-900 leading-none">{count}</div>
+                    <div className="mt-1.5 h-1 w-full rounded-full bg-slate-200">
+                      <div className="h-1 rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                    <p className="text-xs font-medium text-slate-700 truncate" title={stage}>
+                    <p className="mt-1 text-[10px] leading-tight text-slate-500 truncate" title={stage}>
                       {stage}
                     </p>
                   </div>
@@ -402,180 +307,104 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Overdue Matters Alert */}
-          {stats.overdue > 0 && (
-            <Card className="border-red-200 bg-red-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-800">
-                  <AlertTriangle className="h-5 w-5" />
-                  Overdue Matters ({stats.overdue})
-                </CardTitle>
-                <CardDescription className="text-red-700">Immediate attention required</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {overdueMatters.map((matter) => (
-                    <Link key={matter.id} href={`/matters/${matter.id}`}>
-                      <div className="p-3 bg-white rounded-lg border border-red-200 hover:border-red-300 transition-colors">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-slate-900 truncate text-sm">
-                              {matter.matter_number}
-                            </p>
-                            <p className="text-xs text-slate-600 truncate">
-                              {matter.subject || matter.type_of_matter}
-                            </p>
-                          </div>
-                          <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300 text-xs whitespace-nowrap">
-                            {matter.due_date && `${differenceInDays(new Date(), new Date(matter.due_date))}d overdue`}
-                          </Badge>
+        {/* Content panels (side by side) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Needs Attention */}
+          <Card className="border-slate-200">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-red-500" />
+                Needs Attention
+                <span className="ml-auto text-xs font-normal text-slate-400">
+                  {stats.overdue + stats.dueSoon}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 pt-0">
+              {attentionItems.length === 0 ? (
+                <div className="py-10 text-center text-sm text-slate-400">Nothing overdue or due soon</div>
+              ) : (
+                <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+                  {attentionItems.map(({ matter, kind }) => (
+                    <Link key={matter.id} href={`/matters/${matter.id}`} className="block">
+                      <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 p-2 hover:bg-slate-50 transition-colors">
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-slate-900 truncate">{matter.matter_number}</p>
+                          <p className="text-[11px] text-slate-500 truncate">
+                            {matter.subject || matter.type_of_matter}
+                          </p>
                         </div>
-                      </div>
-                    </Link>
-                  ))}
-                  {stats.overdue > 5 && (
-                    <Link href="/matters?filter=overdue">
-                      <Button variant="outline" size="sm" className="w-full text-red-700 border-red-300 hover:bg-red-100">
-                        View All {stats.overdue} Overdue Matters
-                        <ArrowRight className="h-3 w-3 ml-2" />
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Due Soon Alert */}
-          {stats.dueSoon > 0 && (
-            <Card className="border-yellow-200 bg-yellow-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-yellow-800">
-                  <Clock className="h-5 w-5" />
-                  Due in 3 Days ({stats.dueSoon})
-                </CardTitle>
-                <CardDescription className="text-yellow-700">Upcoming deadlines</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {dueSoonMatters.map((matter) => (
-                    <Link key={matter.id} href={`/matters/${matter.id}`}>
-                      <div className="p-3 bg-white rounded-lg border border-yellow-200 hover:border-yellow-300 transition-colors">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-slate-900 truncate text-sm">
-                              {matter.matter_number}
-                            </p>
-                            <p className="text-xs text-slate-600 truncate">
-                              {matter.subject || matter.type_of_matter}
-                            </p>
-                          </div>
-                          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300 text-xs whitespace-nowrap">
+                        {kind === 'overdue' ? (
+                          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-[10px] whitespace-nowrap">
+                            {matter.due_date && `${differenceInDays(new Date(), new Date(matter.due_date))}d over`}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] whitespace-nowrap">
                             {matter.due_date && format(new Date(matter.due_date), 'MMM dd')}
                           </Badge>
-                        </div>
+                        )}
                       </div>
                     </Link>
                   ))}
-                  {stats.dueSoon > 5 && (
-                    <Link href="/matters?filter=due_soon">
-                      <Button variant="outline" size="sm" className="w-full text-yellow-700 border-yellow-300 hover:bg-yellow-100">
-                        View All {stats.dueSoon} Due Soon
-                        <ArrowRight className="h-3 w-3 ml-2" />
-                      </Button>
-                    </Link>
-                  )}
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+              )}
+            </CardContent>
+          </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* My Assigned Matters */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-purple-600" />
+          <Card className="border-slate-200">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Users className="h-4 w-4 text-purple-500" />
                 My Assigned Matters
+                <span className="ml-auto text-xs font-normal text-slate-400">{stats.myAssigned}</span>
               </CardTitle>
-              <CardDescription>Matters assigned to you ({stats.myAssigned})</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 pb-4 pt-0">
               {myMatters.length === 0 ? (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-600">No matters assigned to you yet</p>
-                </div>
+                <div className="py-10 text-center text-sm text-slate-400">No matters assigned to you</div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
                   {myMatters.map((matter) => (
-                    <Link key={matter.id} href={`/matters/${matter.id}`}>
-                      <div className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <p className="font-medium text-slate-900 text-sm truncate">
-                            {matter.matter_number}
-                          </p>
-                          <Badge variant="outline" className={`${getWorkflowStageColor(matter.workflow_stage)} text-xs`}>
+                    <Link key={matter.id} href={`/matters/${matter.id}`} className="block">
+                      <div className="rounded-lg border border-slate-100 p-2 hover:bg-slate-50 transition-colors">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs font-medium text-slate-900 truncate">{matter.matter_number}</p>
+                          <Badge variant="outline" className={cn('text-[10px] whitespace-nowrap', getWorkflowStageColor(matter.workflow_stage))}>
                             {matter.workflow_stage}
                           </Badge>
                         </div>
-                        <p className="text-xs text-slate-600 truncate mb-1">
+                        <p className="text-[11px] text-slate-500 truncate mt-0.5">
                           {matter.subject || matter.type_of_matter}
                         </p>
-                        <div className="flex items-center gap-2 text-xs">
-                          <Badge variant="outline" className={getPriorityColor(matter.priority)}>
-                            {matter.priority}
-                          </Badge>
-                          {matter.due_date && (
-                            <span className="text-slate-500">
-                              Due: {format(new Date(matter.due_date), 'MMM dd, yyyy')}
-                            </span>
-                          )}
-                        </div>
                       </div>
                     </Link>
                   ))}
-                  {stats.myAssigned > 5 && (
-                    <Link href="/matters?filter=my_assigned">
-                      <Button variant="outline" size="sm" className="w-full">
-                        View All My Matters
-                        <ArrowRight className="h-3 w-3 ml-2" />
-                      </Button>
-                    </Link>
-                  )}
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Recent Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-emerald-600" />
+          <Card className="border-slate-200">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Activity className="h-4 w-4 text-emerald-500" />
                 Recent Activity
               </CardTitle>
-              <CardDescription>Latest actions across all matters</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 pb-4 pt-0">
               {recentActivities.length === 0 ? (
-                <div className="text-center py-8">
-                  <Activity className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-600">No recent activity</p>
-                </div>
+                <div className="py-10 text-center text-sm text-slate-400">No recent activity</div>
               ) : (
-                <div className="space-y-3">
-                  {recentActivities.map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-3 pb-3 border-b border-slate-100 last:border-0">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-900 line-clamp-2">
-                          {activity.action_description}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          {format(new Date(activity.created_at), 'MMM dd, yyyy h:mm a')}
+                <div className="space-y-2.5 max-h-[240px] overflow-y-auto pr-1">
+                  {recentActivities.slice(0, 6).map((activity) => (
+                    <div key={activity.id} className="flex gap-2">
+                      <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs text-slate-700 line-clamp-2">{activity.action_description}</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                          {format(new Date(activity.created_at), 'MMM dd, h:mm a')}
                         </p>
                       </div>
                     </div>
@@ -586,64 +415,49 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Status Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Matter Status Overview</CardTitle>
-            <CardDescription>Distribution by status and priority</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* By Status */}
+        {/* Status & Priority (compact) */}
+        <Card className="border-slate-200">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div>
-                <h3 className="font-semibold text-sm text-slate-700 mb-4">By Status</h3>
-                <div className="space-y-3">
+                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">By Status</h3>
+                <div className="space-y-1.5">
                   {Object.values(MATTER_STATUS).map((status) => {
                     const count = stats.byStatus[status] || 0;
-                    const percentage = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
-
+                    const pct = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
                     return (
-                      <div key={status} className="space-y-1">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-700">{status}</span>
-                          <span className="font-medium text-slate-900">{count} ({percentage}%)</span>
+                      <div key={status} className="flex items-center gap-2">
+                        <span className="w-28 text-xs text-slate-600 truncate">{status}</span>
+                        <div className="flex-1 h-1.5 rounded-full bg-slate-100">
+                          <div className="h-1.5 rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
-                          <div
-                            className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
+                        <span className="w-12 text-right text-xs font-medium text-slate-700">
+                          {count} <span className="text-slate-400">({pct}%)</span>
+                        </span>
                       </div>
                     );
                   })}
                 </div>
               </div>
-
-              {/* By Priority */}
               <div>
-                <h3 className="font-semibold text-sm text-slate-700 mb-4">By Priority</h3>
-                <div className="space-y-3">
+                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">By Priority</h3>
+                <div className="space-y-1.5">
                   {Object.values(PRIORITIES).map((priority) => {
                     const count = stats.byPriority[priority] || 0;
-                    const percentage = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
-
+                    const pct = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
                     return (
-                      <div key={priority} className="space-y-1">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className={getPriorityColor(priority)}>
-                              {priority}
-                            </Badge>
-                          </div>
-                          <span className="font-medium text-slate-900">{count} ({percentage}%)</span>
+                      <div key={priority} className="flex items-center gap-2">
+                        <span className="w-28">
+                          <Badge variant="outline" className={cn('text-[10px]', getPriorityColor(priority))}>
+                            {priority}
+                          </Badge>
+                        </span>
+                        <div className="flex-1 h-1.5 rounded-full bg-slate-100">
+                          <div className="h-1.5 rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
-                          <div
-                            className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
+                        <span className="w-12 text-right text-xs font-medium text-slate-700">
+                          {count} <span className="text-slate-400">({pct}%)</span>
+                        </span>
                       </div>
                     );
                   })}

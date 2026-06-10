@@ -26,7 +26,6 @@ interface Module {
   id: string;
   module_name: string;
   module_key: string;
-  module_route: string | null;
 }
 
 interface GroupModulePermission {

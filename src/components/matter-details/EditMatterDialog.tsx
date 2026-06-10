@@ -42,7 +42,6 @@ export function EditMatterDialog({ matter, onUpdate }: EditMatterDialogProps) {
     try {
       const { error } = await supabase
         .from('corporate_matters')
-        // @ts-expect-error - Supabase type inference issue
         .update({ status })
         .eq('id', matter.id);
 

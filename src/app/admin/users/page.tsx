@@ -118,8 +118,8 @@ export default function UsersAdminPage() {
             id: authUser.id,
             email: authUser.email || '',
             created_at: authUser.created_at,
-            last_sign_in_at: authUser.last_sign_in_at,
-            email_confirmed_at: authUser.email_confirmed_at,
+            last_sign_in_at: authUser.last_sign_in_at ?? null,
+            email_confirmed_at: authUser.email_confirmed_at ?? null,
             groups: userGroups,
           };
         })

@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { AppLayout } from '@/components/AppLayout';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -66,13 +68,25 @@ interface ColumnConfig {
   sortable: boolean;
 }
 
-export default function MattersPage() {
+const QUICK_FILTER_LABELS: Record<string, string> = {
+  my: 'My Matters',
+  active: 'Active',
+  closed: 'Closed',
+  pending_assignment: 'Pending Assignment',
+  pending_review: 'Pending Review',
+  overdue: 'Overdue',
+};
+
+function MattersPageContent() {
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
   const [matters, setMatters] = useState<Matter[]>([]);
   const [filteredMatters, setFilteredMatters] = useState<Matter[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Search & Filters
   const [globalSearch, setGlobalSearch] = useState('');
+  const [quickFilter, setQuickFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     status: 'all',
@@ -112,9 +126,22 @@ export default function MattersPage() {
     fetchMatters();
   }, []);
 
+  // Sync search + quick filters from the URL (header search & sidebar links)
+  useEffect(() => {
+    setGlobalSearch(searchParams.get('search') || '');
+    const status = searchParams.get('status');
+    const overdue = searchParams.get('overdue');
+    const view = searchParams.get('view');
+    if (overdue === 'true') setQuickFilter('overdue');
+    else if (view === 'my') setQuickFilter('my');
+    else if (status) setQuickFilter(status);
+    else setQuickFilter('all');
+  }, [searchParams]);
+
   useEffect(() => {
     applyFiltersAndSort();
-  }, [matters, globalSearch, filters, sortField, sortDirection]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matters, globalSearch, filters, sortField, sortDirection, quickFilter, user]);
 
   const fetchMatters = async () => {
     try {
@@ -147,6 +174,34 @@ export default function MattersPage() {
           m.requesting_division?.toLowerCase().includes(searchLower) ||
           m.legal_issues?.toLowerCase().includes(searchLower)
       );
+    }
+
+    // Quick filter (from header search / sidebar links)
+    if (quickFilter !== 'all') {
+      switch (quickFilter) {
+        case 'my':
+          filtered = filtered.filter((m) => m.assigned_officer === user?.id);
+          break;
+        case 'active':
+          filtered = filtered.filter(
+            (m) => m.status !== MATTER_STATUS.CLOSED && m.status !== MATTER_STATUS.COMPLETED
+          );
+          break;
+        case 'closed':
+          filtered = filtered.filter(
+            (m) => m.status === MATTER_STATUS.CLOSED || m.status === MATTER_STATUS.COMPLETED
+          );
+          break;
+        case 'pending_assignment':
+          filtered = filtered.filter((m) => !m.assigned_officer);
+          break;
+        case 'pending_review':
+          filtered = filtered.filter((m) => m.workflow_stage === WORKFLOW_STAGES.PENDING_REVIEW);
+          break;
+        case 'overdue':
+          filtered = filtered.filter((m) => isMatterOverdue(m.due_date, m.status));
+          break;
+      }
     }
 
     // Status filter
@@ -249,6 +304,7 @@ export default function MattersPage() {
       assignedOfficer: 'all',
     });
     setGlobalSearch('');
+    setQuickFilter('all');
   };
 
   const exportToCSV = () => {
@@ -308,17 +364,32 @@ export default function MattersPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Matter Register</h1>
-            <p className="text-slate-600 mt-1">
-              Showing {filteredMatters.length} of {matters.length} matters
-            </p>
+        <div className="flex justify-between items-center gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-slate-900">Matter Register</h1>
+            <div className="text-sm text-slate-500 flex items-center gap-2 flex-wrap">
+              <span>Showing {filteredMatters.length} of {matters.length} matters</span>
+              {quickFilter !== 'all' && (
+                <Badge
+                  variant="outline"
+                  className="bg-emerald-50 text-emerald-700 border-emerald-200 gap-1 font-medium"
+                >
+                  {QUICK_FILTER_LABELS[quickFilter] || quickFilter}
+                  <button
+                    onClick={() => setQuickFilter('all')}
+                    className="hover:text-emerald-900"
+                    aria-label="Clear quick filter"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+            </div>
           </div>
           <Link href="/matters/new">
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white">
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0">
               <Plus className="h-4 w-4 mr-2" />
               Register New Matter
             </Button>
@@ -326,9 +397,9 @@ export default function MattersPage() {
         </div>
 
         {/* Toolbar */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col lg:flex-row gap-4">
+        <Card className="border-slate-200">
+          <CardContent className="p-3">
+            <div className="flex flex-col lg:flex-row gap-2">
               {/* Global Search */}
               <div className="flex-1">
                 <div className="relative">
@@ -337,7 +408,7 @@ export default function MattersPage() {
                     placeholder="Search by matter number, subject, requester, division..."
                     value={globalSearch}
                     onChange={(e) => setGlobalSearch(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-9 bg-slate-50 border-slate-200 focus:bg-white"
                   />
                   {globalSearch && (
                     <button
@@ -354,6 +425,7 @@ export default function MattersPage() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => setShowFilters(!showFilters)}
                   className={activeFilterCount > 0 ? 'border-emerald-500 text-emerald-700' : ''}
                 >
@@ -368,7 +440,7 @@ export default function MattersPage() {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
+                    <Button variant="outline" size="sm">
                       <Columns3 className="h-4 w-4 mr-2" />
                       Columns
                     </Button>
@@ -388,12 +460,12 @@ export default function MattersPage() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button variant="outline" onClick={exportToCSV}>
+                <Button variant="outline" size="sm" onClick={exportToCSV}>
                   <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>
 
-                <Button variant="outline" onClick={fetchMatters}>
+                <Button variant="outline" size="sm" onClick={fetchMatters}>
                   <RefreshCcw className="h-4 w-4 mr-2" />
                   Refresh
                 </Button>
@@ -535,7 +607,7 @@ export default function MattersPage() {
                     {visibleColumns.map((col) => (
                       <th
                         key={col.key}
-                        className={`px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider ${
+                        className={`px-3 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider ${
                           col.sortable ? 'cursor-pointer hover:bg-slate-100' : ''
                         }`}
                         onClick={() => col.sortable && handleSort(col.key as SortField)}
@@ -552,7 +624,7 @@ export default function MattersPage() {
                         </div>
                       </th>
                     ))}
-                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-700 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-right text-xs font-medium text-slate-700 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -583,7 +655,7 @@ export default function MattersPage() {
                           }`}
                         >
                           {visibleColumns.map((col) => (
-                            <td key={col.key} className="px-4 py-3 text-sm">
+                            <td key={col.key} className="px-3 py-2 text-sm">
                               {col.key === 'matter_number' && (
                                 <Link href={`/matters/${matter.id}`}>
                                   <span className="font-medium text-emerald-700 hover:text-emerald-900 hover:underline">
@@ -637,7 +709,7 @@ export default function MattersPage() {
                               )}
                             </td>
                           ))}
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 py-2 text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm">
@@ -680,7 +752,7 @@ export default function MattersPage() {
 
             {/* Pagination */}
             {filteredMatters.length > 0 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200">
+              <div className="flex items-center justify-between px-3 py-2 border-t border-slate-200">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Label className="text-sm text-slate-600">Rows per page:</Label>
@@ -750,5 +822,13 @@ export default function MattersPage() {
         </Card>
       </div>
     </AppLayout>
+  );
+}
+
+export default function MattersPage() {
+  return (
+    <Suspense fallback={null}>
+      <MattersPageContent />
+    </Suspense>
   );
 }

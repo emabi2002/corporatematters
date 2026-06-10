@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: userId,
           email: 'corporate@dlpp.gov.pg',
           full_name: 'Corporate Administrator',
-          role: 'admin',
+          role: 'system_administrator',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         } as any);
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: userId,
           email: 'corporate@dlpp.gov.pg',
           full_name: 'Corporate Administrator',
-          role: 'admin',
+          role: 'system_administrator',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         } as any);

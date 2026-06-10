@@ -124,7 +124,6 @@ export function TasksTab({ matterId, matterStatus, onStatusChange }: TasksTabPro
       if (matterStatus === 'Pending') {
         await supabase
           .from('corporate_matters')
-          // @ts-expect-error - Supabase type inference issue
           .update({ status: 'In Progress' })
           .eq('id', matterId);
         onStatusChange();
@@ -148,7 +147,6 @@ export function TasksTab({ matterId, matterStatus, onStatusChange }: TasksTabPro
 
       const { error } = await supabase
         .from('corporate_matter_tasks')
-        // @ts-expect-error - Supabase type inference issue
         .update(updateData)
         .eq('id', taskId);
 
@@ -168,7 +166,6 @@ export function TasksTab({ matterId, matterStatus, onStatusChange }: TasksTabPro
         if (confirm('All tasks are completed. Mark this matter as Completed?')) {
           await supabase
             .from('corporate_matters')
-            // @ts-expect-error - Supabase type inference issue
             .update({ status: 'Completed' })
             .eq('id', matterId);
           onStatusChange();

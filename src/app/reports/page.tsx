@@ -45,6 +45,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { cn } from '@/lib/utils';
 
 type Matter = Database['public']['Tables']['corporate_matters']['Row'];
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -408,7 +409,7 @@ export default function ReportsPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="p-6 flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
         </div>
       </AppLayout>
@@ -417,19 +418,19 @@ export default function ReportsPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Reports & Analytics</h1>
-            <p className="text-slate-600 mt-1">Comprehensive insights and performance metrics</p>
+            <h1 className="text-2xl font-bold text-slate-900">Reports &amp; Analytics</h1>
+            <p className="text-sm text-slate-500">Comprehensive insights and performance metrics</p>
           </div>
         </div>
 
         {/* Controls */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-wrap items-center gap-4">
+        <Card className="border-slate-200">
+          <CardContent className="p-3">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-slate-600" />
                 <span className="text-sm font-medium text-slate-700">Period:</span>
@@ -470,110 +471,55 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-l-4 border-l-blue-500">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-slate-600">Total Matters</CardTitle>
-                <FileText className="h-4 w-4 text-blue-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-slate-900">{totalMatters}</div>
-              <p className="text-xs text-slate-500 mt-1">{dateRange.label}</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-green-500">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-slate-600">Closed Matters</CardTitle>
-                <BarChart3 className="h-4 w-4 text-green-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-700">{closedMatters}</div>
-              <p className="text-xs text-slate-500 mt-1">
-                {totalMatters > 0 ? ((closedMatters / totalMatters) * 100).toFixed(1) : 0}% completion rate
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-orange-500">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-slate-600">Active Matters</CardTitle>
-                <TrendingUp className="h-4 w-4 text-orange-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-700">{activeMatters}</div>
-              <p className="text-xs text-slate-500 mt-1">Currently in progress</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-red-500">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-slate-600">Overdue</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-red-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-700">{overdueMatters}</div>
-              <p className="text-xs text-slate-500 mt-1">Requires attention</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Performance Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-emerald-600" />
-                Average Turnaround
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-emerald-700">{avgTurnaround}</div>
-              <p className="text-sm text-slate-600 mt-2">days to complete</p>
-              <p className="text-xs text-slate-500 mt-1">Based on {closedWithDates.length} closed matters</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-emerald-600" />
-                SLA Compliance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-emerald-700">{slaCompliance}%</div>
-              <p className="text-sm text-slate-600 mt-2">within deadline</p>
-              <p className="text-xs text-slate-500 mt-1">
-                {withinSLA} of {mattersWithSLA.length} matters
-              </p>
-            </CardContent>
-          </Card>
+        {/* Summary metric tiles */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[
+            { label: 'Total Matters', value: `${totalMatters}`, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', sub: dateRange.label },
+            { label: 'Closed', value: `${closedMatters}`, icon: BarChart3, color: 'text-green-600', bg: 'bg-green-50', sub: `${totalMatters > 0 ? ((closedMatters / totalMatters) * 100).toFixed(0) : 0}% completion` },
+            { label: 'Active', value: `${activeMatters}`, icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50', sub: 'In progress' },
+            { label: 'Overdue', value: `${overdueMatters}`, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50', sub: 'Needs attention' },
+            { label: 'Avg Turnaround', value: `${avgTurnaround}`, suffix: 'd', icon: Clock, color: 'text-teal-600', bg: 'bg-teal-50', sub: `${closedWithDates.length} closed` },
+            { label: 'SLA Compliance', value: `${slaCompliance}`, suffix: '%', icon: Timer, color: 'text-emerald-600', bg: 'bg-emerald-50', sub: `${withinSLA}/${mattersWithSLA.length} on time` },
+          ].map((m) => {
+            const Icon = m.icon;
+            return (
+              <Card key={m.label} className="border-slate-200">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500 truncate">{m.label}</p>
+                      <p className="text-2xl font-bold text-slate-900 leading-tight">
+                        {m.value}
+                        {m.suffix ? (
+                          <span className="text-base font-semibold text-slate-400 ml-0.5">{m.suffix}</span>
+                        ) : null}
+                      </p>
+                      <p className="text-[10px] text-slate-400 truncate mt-0.5">{m.sub}</p>
+                    </div>
+                    <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg flex-shrink-0', m.bg)}>
+                      <Icon className={cn('h-5 w-5', m.color)} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Charts Section */}
-        <div id="charts-container" className="space-y-6">
+        <div id="charts-container" className="space-y-4">
           {/* Monthly Trend Chart */}
           {monthlyTrendData.length > 1 && (
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-base flex items-center gap-2">
                   <Activity className="h-5 w-5 text-emerald-600" />
                   Monthly Trend Analysis
                 </CardTitle>
                 <CardDescription>Matter counts over time</CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+              <CardContent className="px-4 pb-4">
+                <ResponsiveContainer width="100%" height={240}>
                   <LineChart data={monthlyTrendData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
@@ -590,18 +536,18 @@ export default function ReportsPage() {
           )}
 
           {/* Charts Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Status Distribution Pie Chart */}
             {statusData.length > 0 && (
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base flex items-center gap-2">
                     <PieChartIcon className="h-5 w-5 text-emerald-600" />
                     Status Distribution
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="px-4 pb-4">
+                  <ResponsiveContainer width="100%" height={240}>
                     <PieChart>
                       <Pie
                         data={statusData}
@@ -627,14 +573,14 @@ export default function ReportsPage() {
             {/* Priority Distribution Bar Chart */}
             {priorityData.length > 0 && (
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-emerald-600" />
                     Priority Distribution
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="px-4 pb-4">
+                  <ResponsiveContainer width="100%" height={240}>
                     <BarChart data={priorityData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
@@ -650,15 +596,15 @@ export default function ReportsPage() {
             {/* Overdue Aging Analysis */}
             {overdueMatters > 0 && (
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base flex items-center gap-2">
                     <Timer className="h-5 w-5 text-red-600" />
                     Overdue Aging Analysis
                   </CardTitle>
                   <CardDescription>Days overdue by bucket</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="px-4 pb-4">
+                  <ResponsiveContainer width="100%" height={240}>
                     <BarChart data={agingBuckets}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
@@ -674,15 +620,15 @@ export default function ReportsPage() {
             {/* Matter Age Distribution */}
             {activeMatters > 0 && (
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base flex items-center gap-2">
                     <Clock className="h-5 w-5 text-blue-600" />
                     Open Matter Age Distribution
                   </CardTitle>
                   <CardDescription>Age of currently open matters</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="px-4 pb-4">
+                  <ResponsiveContainer width="100%" height={240}>
                     <BarChart data={ageDistribution}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
@@ -698,15 +644,15 @@ export default function ReportsPage() {
             {/* Division Distribution */}
             {divisionData.length > 0 && (
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base flex items-center gap-2">
                     <Building2 className="h-5 w-5 text-emerald-600" />
                     Top Divisions
                   </CardTitle>
                   <CardDescription>Matters by requesting division</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="px-4 pb-4">
+                  <ResponsiveContainer width="100%" height={240}>
                     <BarChart data={divisionData} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" />
@@ -722,15 +668,15 @@ export default function ReportsPage() {
             {/* Officer Workload Chart */}
             {officerWorkload.length > 0 && (
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base flex items-center gap-2">
                     <Users className="h-5 w-5 text-emerald-600" />
                     Officer Workload Comparison
                   </CardTitle>
                   <CardDescription>Active vs completed matters</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="px-4 pb-4">
+                  <ResponsiveContainer width="100%" height={240}>
                     <BarChart data={officerWorkload.slice(0, 5)}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
@@ -757,11 +703,11 @@ export default function ReportsPage() {
           {/* Officer Workload Table */}
           <TabsContent value="officers">
             <Card>
-              <CardHeader>
-                <CardTitle>Officer Performance Metrics</CardTitle>
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-base">Officer Performance Metrics</CardTitle>
                 <CardDescription>Detailed workload and performance by officer</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-4 pb-4">
                 {officerWorkload.length === 0 ? (
                   <div className="text-center py-8 text-slate-600">No data available for selected period</div>
                 ) : (
@@ -797,11 +743,11 @@ export default function ReportsPage() {
           {/* Division Table */}
           <TabsContent value="divisions">
             <Card>
-              <CardHeader>
-                <CardTitle>Division Breakdown</CardTitle>
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-base">Division Breakdown</CardTitle>
                 <CardDescription>Matter distribution across divisions</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-4 pb-4">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>

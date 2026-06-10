@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -51,10 +52,17 @@ export function TopHeader({
   const { user, profile, signOut } = useAuth();
   const router = useRouter();
   const { roleDescription, roleColor } = usePermissions();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSignOut = async () => {
     await signOut();
     router.push('/auth/login');
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    router.push(q ? `/matters?search=${encodeURIComponent(q)}` : '/matters');
   };
 
   return (
@@ -88,16 +96,18 @@ export function TopHeader({
           </Button>
         )}
 
-        <div className="hidden md:block">
+        <form onSubmit={handleSearch} className="hidden md:block">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               type="search"
-              placeholder="Search matters, documents, tasks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search matters by number, subject, requester..."
               className="pl-10 w-80 bg-slate-50 border-slate-200 focus:bg-white"
             />
           </div>
-        </div>
+        </form>
       </div>
 
       <div className="flex items-center gap-3">
