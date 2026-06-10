@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -13,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { createClient } from '@/lib/supabase';
-import { format, subDays, subMonths, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays, eachMonthOfInterval, parseISO } from 'date-fns';
+import { format, subDays, subMonths, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays, eachMonthOfInterval } from 'date-fns';
 import {
   BarChart3,
   TrendingUp,
@@ -31,13 +30,8 @@ import {
 } from 'lucide-react';
 import type { Database } from '@/lib/database.types';
 import {
-  BarChart,
-  Bar,
   LineChart,
   Line,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -67,7 +61,69 @@ const DATE_RANGES = {
   ALL_TIME: 'all_time',
 };
 
-const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+// Progress-bar palettes (Overview-style)
+const AGE_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
+const OVERDUE_COLORS = ['#fca5a5', '#f87171', '#ef4444', '#b91c1c'];
+
+function statusColor(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes('closed') || n.includes('complete')) return '#10b981';
+  if (n.includes('progress')) return '#3b82f6';
+  if (n.includes('open') || n.includes('new')) return '#f59e0b';
+  if (n.includes('hold') || n.includes('pending') || n.includes('review')) return '#a855f7';
+  if (n.includes('cancel') || n.includes('reject')) return '#ef4444';
+  return '#64748b';
+}
+
+function priorityColor(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes('urgent') || n.includes('critical') || n.includes('high')) return '#ef4444';
+  if (n.includes('normal') || n.includes('medium') || n.includes('routine')) return '#10b981';
+  if (n.includes('low')) return '#3b82f6';
+  return '#f59e0b';
+}
+
+/** Overview-style horizontal distribution bars. */
+function DistributionBars({
+  data,
+  total,
+  colors,
+  emptyText = 'No data',
+}: {
+  data: { name: string; value: number }[];
+  total: number;
+  colors: string[] | ((name: string, index: number) => string);
+  emptyText?: string;
+}) {
+  const hasData = total > 0 && data.some((d) => d.value > 0);
+  if (!hasData) {
+    return <div className="py-8 text-center text-sm text-slate-400">{emptyText}</div>;
+  }
+  return (
+    <div className="space-y-2.5">
+      {data.map((d, i) => {
+        const pct = total > 0 ? Math.round((d.value / total) * 100) : 0;
+        const color = typeof colors === 'function' ? colors(d.name, i) : colors[i % colors.length];
+        return (
+          <div key={d.name} className="flex items-center gap-3">
+            <span className="w-32 shrink-0 text-xs text-slate-600 truncate" title={d.name}>
+              {d.name}
+            </span>
+            <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-2 rounded-full transition-all"
+                style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: color }}
+              />
+            </div>
+            <span className="w-16 shrink-0 text-right text-xs font-medium text-slate-700">
+              {d.value} <span className="text-slate-400">({pct}%)</span>
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function ReportsPage() {
   const [matters, setMatters] = useState<Matter[]>([]);
@@ -409,78 +465,75 @@ export default function ReportsPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mx-auto" />
+            <p className="mt-3 text-sm text-slate-600">Loading reports...</p>
+          </div>
         </div>
       </AppLayout>
     );
   }
 
+  const completionPct = totalMatters > 0 ? ((closedMatters / totalMatters) * 100).toFixed(0) : '0';
+
+  const metricTiles = [
+    { label: 'Total Matters', value: `${totalMatters}`, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', sub: dateRange.label },
+    { label: 'Closed', value: `${closedMatters}`, icon: BarChart3, color: 'text-green-600', bg: 'bg-green-50', sub: `${completionPct}% completion` },
+    { label: 'Active', value: `${activeMatters}`, icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50', sub: 'In progress' },
+    { label: 'Overdue', value: `${overdueMatters}`, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50', sub: 'Needs attention' },
+    { label: 'Avg Turnaround', value: `${avgTurnaround}`, suffix: 'd', icon: Clock, color: 'text-teal-600', bg: 'bg-teal-50', sub: `${closedWithDates.length} closed` },
+    { label: 'SLA Compliance', value: `${slaCompliance}`, suffix: '%', icon: Timer, color: 'text-emerald-600', bg: 'bg-emerald-50', sub: `${withinSLA}/${mattersWithSLA.length} on time` },
+  ] as const;
+
+  const axisTick = { fontSize: 11, fill: '#94a3b8' } as const;
+
   return (
     <AppLayout>
       <div className="max-w-[1600px] mx-auto space-y-4">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4">
+        {/* Header (controls inline, Overview-style) */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Reports &amp; Analytics</h1>
             <p className="text-sm text-slate-500">Comprehensive insights and performance metrics</p>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4 text-slate-500" />
+              <Select value={selectedRange} onValueChange={setSelectedRange}>
+                <SelectTrigger className="h-9 w-[150px] text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={DATE_RANGES.TODAY}>Today</SelectItem>
+                  <SelectItem value={DATE_RANGES.LAST_7_DAYS}>Last 7 Days</SelectItem>
+                  <SelectItem value={DATE_RANGES.THIS_MONTH}>This Month</SelectItem>
+                  <SelectItem value={DATE_RANGES.LAST_MONTH}>Last Month</SelectItem>
+                  <SelectItem value={DATE_RANGES.LAST_QUARTER}>Last Quarter</SelectItem>
+                  <SelectItem value={DATE_RANGES.THIS_YEAR}>This Year</SelectItem>
+                  <SelectItem value={DATE_RANGES.LAST_YEAR}>Last Year</SelectItem>
+                  <SelectItem value={DATE_RANGES.ALL_TIME}>All Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="outline" size="sm" onClick={exportToCSV} className="h-9">
+              <Download className="h-4 w-4 mr-1.5" />
+              CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportToPDF} disabled={exporting} className="h-9">
+              <Download className="h-4 w-4 mr-1.5" />
+              {exporting ? 'Generating...' : 'PDF'}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handlePrint} className="h-9">
+              <Printer className="h-4 w-4 mr-1.5" />
+              Print
+            </Button>
+          </div>
         </div>
 
-        {/* Controls */}
-        <Card className="border-slate-200">
-          <CardContent className="p-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-slate-600" />
-                <span className="text-sm font-medium text-slate-700">Period:</span>
-                <Select value={selectedRange} onValueChange={setSelectedRange}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={DATE_RANGES.TODAY}>Today</SelectItem>
-                    <SelectItem value={DATE_RANGES.LAST_7_DAYS}>Last 7 Days</SelectItem>
-                    <SelectItem value={DATE_RANGES.THIS_MONTH}>This Month</SelectItem>
-                    <SelectItem value={DATE_RANGES.LAST_MONTH}>Last Month</SelectItem>
-                    <SelectItem value={DATE_RANGES.LAST_QUARTER}>Last Quarter</SelectItem>
-                    <SelectItem value={DATE_RANGES.THIS_YEAR}>This Year</SelectItem>
-                    <SelectItem value={DATE_RANGES.LAST_YEAR}>Last Year</SelectItem>
-                    <SelectItem value={DATE_RANGES.ALL_TIME}>All Time</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex-1"></div>
-
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={exportToCSV}>
-                  <Download className="h-4 w-4 mr-2" />
-                  CSV
-                </Button>
-                <Button variant="outline" size="sm" onClick={exportToPDF} disabled={exporting}>
-                  <Download className="h-4 w-4 mr-2" />
-                  {exporting ? 'Generating...' : 'PDF'}
-                </Button>
-                <Button variant="outline" size="sm" onClick={handlePrint}>
-                  <Printer className="h-4 w-4 mr-2" />
-                  Print
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Summary metric tiles */}
+        {/* Metric tiles (Overview-style) */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {[
-            { label: 'Total Matters', value: `${totalMatters}`, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', sub: dateRange.label },
-            { label: 'Closed', value: `${closedMatters}`, icon: BarChart3, color: 'text-green-600', bg: 'bg-green-50', sub: `${totalMatters > 0 ? ((closedMatters / totalMatters) * 100).toFixed(0) : 0}% completion` },
-            { label: 'Active', value: `${activeMatters}`, icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50', sub: 'In progress' },
-            { label: 'Overdue', value: `${overdueMatters}`, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50', sub: 'Needs attention' },
-            { label: 'Avg Turnaround', value: `${avgTurnaround}`, suffix: 'd', icon: Clock, color: 'text-teal-600', bg: 'bg-teal-50', sub: `${closedWithDates.length} closed` },
-            { label: 'SLA Compliance', value: `${slaCompliance}`, suffix: '%', icon: Timer, color: 'text-emerald-600', bg: 'bg-emerald-50', sub: `${withinSLA}/${mattersWithSLA.length} on time` },
-          ].map((m) => {
+          {metricTiles.map((m) => {
             const Icon = m.icon;
             return (
               <Card key={m.label} className="border-slate-200">
@@ -490,7 +543,7 @@ export default function ReportsPage() {
                       <p className="text-xs font-medium text-slate-500 truncate">{m.label}</p>
                       <p className="text-2xl font-bold text-slate-900 leading-tight">
                         {m.value}
-                        {m.suffix ? (
+                        {'suffix' in m && m.suffix ? (
                           <span className="text-base font-semibold text-slate-400 ml-0.5">{m.suffix}</span>
                         ) : null}
                       </p>
@@ -506,274 +559,197 @@ export default function ReportsPage() {
           })}
         </div>
 
-        {/* Charts Section */}
+        {/* Charts */}
         <div id="charts-container" className="space-y-4">
-          {/* Monthly Trend Chart */}
+          {/* Monthly Trend (full width) */}
           {monthlyTrendData.length > 1 && (
-            <Card>
+            <Card className="border-slate-200">
               <CardHeader className="py-3 px-4">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-emerald-600" />
+                <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                  <Activity className="h-4 w-4 text-emerald-600" />
                   Monthly Trend Analysis
+                  <span className="ml-auto text-xs font-normal text-slate-400">{dateRange.label}</span>
                 </CardTitle>
-                <CardDescription>Matter counts over time</CardDescription>
               </CardHeader>
-              <CardContent className="px-4 pb-4">
-                <ResponsiveContainer width="100%" height={240}>
-                  <LineChart data={monthlyTrendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="total" stroke="#10b981" strokeWidth={2} name="Total" />
-                    <Line type="monotone" dataKey="closed" stroke="#3b82f6" strokeWidth={2} name="Closed" />
-                    <Line type="monotone" dataKey="active" stroke="#f59e0b" strokeWidth={2} name="Active" />
+              <CardContent className="px-4 pb-4 pt-0">
+                <ResponsiveContainer width="100%" height={220}>
+                  <LineChart data={monthlyTrendData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="month" tick={axisTick} stroke="#cbd5e1" />
+                    <YAxis tick={axisTick} stroke="#cbd5e1" allowDecimals={false} />
+                    <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, borderColor: '#e2e8f0' }} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Line type="monotone" dataKey="total" stroke="#10b981" strokeWidth={2} name="Total" dot={false} />
+                    <Line type="monotone" dataKey="closed" stroke="#3b82f6" strokeWidth={2} name="Closed" dot={false} />
+                    <Line type="monotone" dataKey="active" stroke="#f59e0b" strokeWidth={2} name="Active" dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           )}
 
-          {/* Charts Grid */}
+          {/* 2-column distribution grid (Overview-style progress bars) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Status Distribution Pie Chart */}
-            {statusData.length > 0 && (
-              <Card>
-                <CardHeader className="py-3 px-4">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <PieChartIcon className="h-5 w-5 text-emerald-600" />
-                    Status Distribution
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="px-4 pb-4">
-                  <ResponsiveContainer width="100%" height={240}>
-                    <PieChart>
-                      <Pie
-                        data={statusData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {statusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
+            {/* Status Distribution */}
+            <Card className="border-slate-200">
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                  <PieChartIcon className="h-4 w-4 text-emerald-600" />
+                  Status Distribution
+                  <span className="ml-auto text-xs font-normal text-slate-400">{totalMatters}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 pt-1">
+                <DistributionBars
+                  data={statusData}
+                  total={totalMatters}
+                  colors={(name) => statusColor(name)}
+                  emptyText="No matters in this period"
+                />
+              </CardContent>
+            </Card>
 
-            {/* Priority Distribution Bar Chart */}
-            {priorityData.length > 0 && (
-              <Card>
-                <CardHeader className="py-3 px-4">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-emerald-600" />
-                    Priority Distribution
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="px-4 pb-4">
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={priorityData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#10b981" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
+            {/* Priority Distribution */}
+            <Card className="border-slate-200">
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                  <BarChart3 className="h-4 w-4 text-blue-600" />
+                  Priority Distribution
+                  <span className="ml-auto text-xs font-normal text-slate-400">{totalMatters}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 pt-1">
+                <DistributionBars
+                  data={priorityData}
+                  total={totalMatters}
+                  colors={(name) => priorityColor(name)}
+                  emptyText="No matters in this period"
+                />
+              </CardContent>
+            </Card>
 
-            {/* Overdue Aging Analysis */}
-            {overdueMatters > 0 && (
-              <Card>
-                <CardHeader className="py-3 px-4">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Timer className="h-5 w-5 text-red-600" />
-                    Overdue Aging Analysis
-                  </CardTitle>
-                  <CardDescription>Days overdue by bucket</CardDescription>
-                </CardHeader>
-                <CardContent className="px-4 pb-4">
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={agingBuckets}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#ef4444" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
+            {/* Open Matter Age */}
+            <Card className="border-slate-200">
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                  Open Matter Age
+                  <span className="ml-auto text-xs font-normal text-slate-400">{activeMatters}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 pt-1">
+                <DistributionBars
+                  data={ageDistribution}
+                  total={activeMatters}
+                  colors={AGE_COLORS}
+                  emptyText="No open matters"
+                />
+              </CardContent>
+            </Card>
 
-            {/* Matter Age Distribution */}
-            {activeMatters > 0 && (
-              <Card>
-                <CardHeader className="py-3 px-4">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-blue-600" />
-                    Open Matter Age Distribution
-                  </CardTitle>
-                  <CardDescription>Age of currently open matters</CardDescription>
-                </CardHeader>
-                <CardContent className="px-4 pb-4">
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={ageDistribution}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#3b82f6" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Division Distribution */}
-            {divisionData.length > 0 && (
-              <Card>
-                <CardHeader className="py-3 px-4">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Building2 className="h-5 w-5 text-emerald-600" />
-                    Top Divisions
-                  </CardTitle>
-                  <CardDescription>Matters by requesting division</CardDescription>
-                </CardHeader>
-                <CardContent className="px-4 pb-4">
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={divisionData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" />
-                      <YAxis dataKey="name" type="category" width={100} />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#f59e0b" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Officer Workload Chart */}
-            {officerWorkload.length > 0 && (
-              <Card>
-                <CardHeader className="py-3 px-4">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Users className="h-5 w-5 text-emerald-600" />
-                    Officer Workload Comparison
-                  </CardTitle>
-                  <CardDescription>Active vs completed matters</CardDescription>
-                </CardHeader>
-                <CardContent className="px-4 pb-4">
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={officerWorkload.slice(0, 5)}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="active" fill="#f59e0b" name="Active" />
-                      <Bar dataKey="completed" fill="#10b981" name="Completed" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
+            {/* Overdue Aging */}
+            <Card className="border-slate-200">
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                  <Timer className="h-4 w-4 text-red-600" />
+                  Overdue Aging
+                  <span className="ml-auto text-xs font-normal text-slate-400">{overdueMatters}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 pt-1">
+                <DistributionBars
+                  data={agingBuckets}
+                  total={overdueMatters}
+                  colors={OVERDUE_COLORS}
+                  emptyText="No overdue matters"
+                />
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        {/* Data Tables */}
-        <Tabs defaultValue="officers" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="officers">Officer Details</TabsTrigger>
-            <TabsTrigger value="divisions">Division Details</TabsTrigger>
-          </TabsList>
-
-          {/* Officer Workload Table */}
-          <TabsContent value="officers">
-            <Card>
-              <CardHeader className="py-3 px-4">
-                <CardTitle className="text-base">Officer Performance Metrics</CardTitle>
-                <CardDescription>Detailed workload and performance by officer</CardDescription>
-              </CardHeader>
-              <CardContent className="px-4 pb-4">
-                {officerWorkload.length === 0 ? (
-                  <div className="text-center py-8 text-slate-600">No data available for selected period</div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left p-2 text-sm font-medium text-slate-700">Officer</th>
-                          <th className="text-right p-2 text-sm font-medium text-slate-700">Active</th>
-                          <th className="text-right p-2 text-sm font-medium text-slate-700">Completed</th>
-                          <th className="text-right p-2 text-sm font-medium text-slate-700">Total</th>
-                          <th className="text-right p-2 text-sm font-medium text-slate-700">Avg Days</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {officerWorkload.map((officer) => (
-                          <tr key={officer.name} className="border-b hover:bg-slate-50">
-                            <td className="p-2 text-sm text-slate-900">{officer.name}</td>
-                            <td className="p-2 text-sm text-orange-700 text-right font-medium">{officer.active}</td>
-                            <td className="p-2 text-sm text-green-700 text-right font-medium">{officer.completed}</td>
-                            <td className="p-2 text-sm text-slate-900 text-right font-bold">{officer.total}</td>
-                            <td className="p-2 text-sm text-slate-600 text-right">{officer.avgDays}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Division Table */}
-          <TabsContent value="divisions">
-            <Card>
-              <CardHeader className="py-3 px-4">
-                <CardTitle className="text-base">Division Breakdown</CardTitle>
-                <CardDescription>Matter distribution across divisions</CardDescription>
-              </CardHeader>
-              <CardContent className="px-4 pb-4">
-                <div className="overflow-x-auto">
+        {/* Detail tables (flattened onto one page, side by side) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Officer Performance */}
+          <Card className="border-slate-200">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                <Users className="h-4 w-4 text-emerald-600" />
+                Officer Performance
+                <span className="ml-auto text-xs font-normal text-slate-400">{officerWorkload.length}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 pt-0">
+              {officerWorkload.length === 0 ? (
+                <div className="py-10 text-center text-sm text-slate-400">No data for selected period</div>
+              ) : (
+                <div className="max-h-[280px] overflow-y-auto pr-1">
                   <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left p-2 text-sm font-medium text-slate-700">Division</th>
-                        <th className="text-right p-2 text-sm font-medium text-slate-700">Count</th>
-                        <th className="text-right p-2 text-sm font-medium text-slate-700">Percentage</th>
+                    <thead className="sticky top-0 bg-white">
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left p-2 text-xs font-medium text-slate-500">Officer</th>
+                        <th className="text-right p-2 text-xs font-medium text-slate-500">Active</th>
+                        <th className="text-right p-2 text-xs font-medium text-slate-500">Done</th>
+                        <th className="text-right p-2 text-xs font-medium text-slate-500">Total</th>
+                        <th className="text-right p-2 text-xs font-medium text-slate-500">Avg d</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {officerWorkload.map((officer) => (
+                        <tr key={officer.name} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="p-2 text-xs text-slate-900 truncate max-w-[160px]">{officer.name}</td>
+                          <td className="p-2 text-xs text-orange-700 text-right font-medium">{officer.active}</td>
+                          <td className="p-2 text-xs text-green-700 text-right font-medium">{officer.completed}</td>
+                          <td className="p-2 text-xs text-slate-900 text-right font-bold">{officer.total}</td>
+                          <td className="p-2 text-xs text-slate-600 text-right">{officer.avgDays}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Division Breakdown */}
+          <Card className="border-slate-200">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                <Building2 className="h-4 w-4 text-orange-600" />
+                Division Breakdown
+                <span className="ml-auto text-xs font-normal text-slate-400">{divisionData.length}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 pt-0">
+              {divisionData.length === 0 ? (
+                <div className="py-10 text-center text-sm text-slate-400">No data for selected period</div>
+              ) : (
+                <div className="max-h-[280px] overflow-y-auto pr-1">
+                  <table className="w-full">
+                    <thead className="sticky top-0 bg-white">
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left p-2 text-xs font-medium text-slate-500">Division</th>
+                        <th className="text-right p-2 text-xs font-medium text-slate-500">Count</th>
+                        <th className="text-right p-2 text-xs font-medium text-slate-500">%</th>
                       </tr>
                     </thead>
                     <tbody>
                       {divisionData.map((division) => (
-                        <tr key={division.name} className="border-b hover:bg-slate-50">
-                          <td className="p-2 text-sm text-slate-900">{division.name}</td>
-                          <td className="p-2 text-sm text-slate-900 text-right font-medium">{division.value}</td>
-                          <td className="p-2 text-sm text-slate-600 text-right">
-                            {((division.value / totalMatters) * 100).toFixed(1)}%
+                        <tr key={division.name} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="p-2 text-xs text-slate-900 truncate max-w-[200px]">{division.name}</td>
+                          <td className="p-2 text-xs text-slate-900 text-right font-medium">{division.value}</td>
+                          <td className="p-2 text-xs text-slate-600 text-right">
+                            {totalMatters > 0 ? ((division.value / totalMatters) * 100).toFixed(1) : '0.0'}%
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </AppLayout>
   );

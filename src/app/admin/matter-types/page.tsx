@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -210,8 +210,11 @@ export default function MatterTypesPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mx-auto" />
+            <p className="mt-3 text-sm text-slate-600">Loading matter types...</p>
+          </div>
         </div>
       </AppLayout>
     );
@@ -242,7 +245,7 @@ export default function MatterTypesPage() {
         </div>
 
         {/* Search */}
-        <Card>
+        <Card className="border-slate-200">
           <CardContent className="p-3">
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
@@ -257,15 +260,15 @@ export default function MatterTypesPage() {
         </Card>
 
         {/* Matter Types Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-emerald-600" />
+        <Card className="border-slate-200">
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+              <FileText className="h-4 w-4 text-emerald-600" />
               Matter Types
+              <span className="ml-auto text-xs font-normal text-slate-400">{filteredMatterTypes.length}</span>
             </CardTitle>
-            <CardDescription>Manage types of corporate matters</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 pb-4 pt-0">
             {filteredMatterTypes.length === 0 ? (
               <div className="text-center py-12">
                 <FileText className="h-12 w-12 text-slate-300 mx-auto mb-4" />
@@ -277,26 +280,26 @@ export default function MatterTypesPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 text-sm font-medium text-slate-700">Name</th>
-                      <th className="text-left p-3 text-sm font-medium text-slate-700">Description</th>
-                      <th className="text-left p-3 text-sm font-medium text-slate-700">Status</th>
-                      <th className="text-left p-3 text-sm font-medium text-slate-700">Created</th>
-                      <th className="text-right p-3 text-sm font-medium text-slate-700">Actions</th>
+                    <tr className="border-b border-slate-200">
+                      <th className="text-left p-2 text-xs font-medium text-slate-500">Name</th>
+                      <th className="text-left p-2 text-xs font-medium text-slate-500">Description</th>
+                      <th className="text-left p-2 text-xs font-medium text-slate-500">Status</th>
+                      <th className="text-left p-2 text-xs font-medium text-slate-500">Created</th>
+                      <th className="text-right p-2 text-xs font-medium text-slate-500">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredMatterTypes.map((matterType) => (
-                      <tr key={matterType.id} className="border-b hover:bg-slate-50">
-                        <td className="p-3">
-                          <p className="font-medium text-slate-900">{matterType.name}</p>
+                      <tr key={matterType.id} className="border-b border-slate-100 hover:bg-slate-50">
+                        <td className="p-2">
+                          <p className="text-xs font-medium text-slate-900">{matterType.name}</p>
                         </td>
-                        <td className="p-3">
-                          <p className="text-sm text-slate-600">
+                        <td className="p-2">
+                          <p className="text-xs text-slate-600">
                             {matterType.description || '-'}
                           </p>
                         </td>
-                        <td className="p-3">
+                        <td className="p-2">
                           {matterType.is_active ? (
                             <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
                               <CheckCircle className="h-3 w-3 mr-1" />
@@ -309,12 +312,12 @@ export default function MatterTypesPage() {
                             </Badge>
                           )}
                         </td>
-                        <td className="p-3">
-                          <span className="text-sm text-slate-600">
+                        <td className="p-2">
+                          <span className="text-xs text-slate-600">
                             {format(new Date(matterType.created_at), 'MMM dd, yyyy')}
                           </span>
                         </td>
-                        <td className="p-3">
+                        <td className="p-2">
                           <div className="flex items-center justify-end gap-2">
                             <Button
                               variant="ghost"

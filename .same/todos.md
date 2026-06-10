@@ -121,3 +121,25 @@
       - removed temp scripts/_introspect_ref.mjs & _probe_exec.mjs
       - verified: no service-role key in repo, .env.local ignored, token scrubbed from .git/config
       - SECURITY: advise user to rotate the pasted GitHub PAT (it's now in chat history)
+
+## Reports & Analytics — match Dashboard Overview format (DONE)
+- [x] Clean header with inline Period selector + CSV/PDF/Print controls (Overview-style title/actions row)
+- [x] Compact metric tiles (6-col) consistent with Overview tiles
+- [x] Restyle all charts: `text-sm` card titles, `h-4 w-4` colored icons, `border-slate-200`, count badges on the right
+- [x] Refined chart visuals: slate axes/grid, smaller tick fonts, rounded bars, dot-less lines, styled tooltips
+- [x] Flattened the tabbed Officer/Division tables into side-by-side cards (everything on ONE page)
+- [x] Compact tables with sticky headers + scroll, `text-xs` cells
+- [x] Match Overview loading spinner (emerald) + "Loading reports..."
+- [x] Removed unused imports (Tabs*, CardDescription, parseISO)
+- [x] Lint/type check clean; /reports compiles 200
+
+## Reports — Overview-style progress bars (DONE)
+- [x] Converted Status, Priority, Open Matter Age, Overdue Aging from recharts pie/bar to horizontal progress bars
+- [x] Added reusable `DistributionBars` component + semantic color helpers
+- [x] Dropped redundant Top Divisions & Officer Workload bar charts (data already in detail tables)
+- [x] Kept the single Monthly Trend line chart; trimmed recharts imports
+
+## Admin pages — compact Overview format (DONE, via task agent)
+- [x] users, groups, divisions, document-types, matter-types, reference-data
+- [x] Content cards compacted; removed CardDescription; tables denser; loaders match Overview
+- [x] All /admin/* routes 200; lint exit 0

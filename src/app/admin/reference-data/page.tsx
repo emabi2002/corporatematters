@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -129,8 +129,11 @@ export default function ReferenceDataPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mx-auto" />
+            <p className="mt-3 text-sm text-slate-600">Loading reference data...</p>
+          </div>
         </div>
       </AppLayout>
     );
@@ -188,31 +191,35 @@ export default function ReferenceDataPage() {
 
           {/* Divisions Tab */}
           <TabsContent value="divisions">
-            <Card>
-              <CardHeader>
+            <Card className="border-slate-200">
+              <CardHeader className="py-3 px-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle>Divisions</CardTitle>
+                  <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                    <Building2 className="h-4 w-4 text-blue-600" />
+                    Divisions
+                    <span className="text-xs font-normal text-slate-400">{divisions.length}</span>
+                  </CardTitle>
                   <Button onClick={() => handleCreate('division')}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Division
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-4 pb-4 pt-0">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 text-sm font-medium text-slate-700">Name</th>
-                      <th className="text-left p-3 text-sm font-medium text-slate-700">Description</th>
-                      <th className="text-right p-3 text-sm font-medium text-slate-700">Actions</th>
+                    <tr className="border-b border-slate-200">
+                      <th className="text-left p-2 text-xs font-medium text-slate-500">Name</th>
+                      <th className="text-left p-2 text-xs font-medium text-slate-500">Description</th>
+                      <th className="text-right p-2 text-xs font-medium text-slate-500">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {divisions.map((div) => (
-                      <tr key={div.id} className="border-b hover:bg-slate-50">
-                        <td className="p-3 font-medium text-slate-900">{div.name}</td>
-                        <td className="p-3 text-sm text-slate-600">{div.description || 'N/A'}</td>
-                        <td className="p-3">
+                      <tr key={div.id} className="border-b border-slate-100 hover:bg-slate-50">
+                        <td className="p-2 text-xs font-medium text-slate-900">{div.name}</td>
+                        <td className="p-2 text-xs text-slate-600">{div.description || 'N/A'}</td>
+                        <td className="p-2">
                           <div className="flex justify-end gap-2">
                             <Button variant="ghost" size="sm" onClick={() => handleEdit('division', div)}>
                               <Edit className="h-4 w-4" />
@@ -236,31 +243,35 @@ export default function ReferenceDataPage() {
 
           {/* Matter Types Tab */}
           <TabsContent value="matterTypes">
-            <Card>
-              <CardHeader>
+            <Card className="border-slate-200">
+              <CardHeader className="py-3 px-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle>Matter Types</CardTitle>
+                  <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                    <FileText className="h-4 w-4 text-green-600" />
+                    Matter Types
+                    <span className="text-xs font-normal text-slate-400">{matterTypes.length}</span>
+                  </CardTitle>
                   <Button onClick={() => handleCreate('matterType')}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Matter Type
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-4 pb-4 pt-0">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 text-sm font-medium text-slate-700">Name</th>
-                      <th className="text-left p-3 text-sm font-medium text-slate-700">Description</th>
-                      <th className="text-right p-3 text-sm font-medium text-slate-700">Actions</th>
+                    <tr className="border-b border-slate-200">
+                      <th className="text-left p-2 text-xs font-medium text-slate-500">Name</th>
+                      <th className="text-left p-2 text-xs font-medium text-slate-500">Description</th>
+                      <th className="text-right p-2 text-xs font-medium text-slate-500">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {matterTypes.map((type) => (
-                      <tr key={type.id} className="border-b hover:bg-slate-50">
-                        <td className="p-3 font-medium text-slate-900">{type.name}</td>
-                        <td className="p-3 text-sm text-slate-600">{type.description || 'N/A'}</td>
-                        <td className="p-3">
+                      <tr key={type.id} className="border-b border-slate-100 hover:bg-slate-50">
+                        <td className="p-2 text-xs font-medium text-slate-900">{type.name}</td>
+                        <td className="p-2 text-xs text-slate-600">{type.description || 'N/A'}</td>
+                        <td className="p-2">
                           <div className="flex justify-end gap-2">
                             <Button variant="ghost" size="sm" onClick={() => handleEdit('matterType', type)}>
                               <Edit className="h-4 w-4" />
@@ -284,31 +295,35 @@ export default function ReferenceDataPage() {
 
           {/* Document Types Tab */}
           <TabsContent value="documentTypes">
-            <Card>
-              <CardHeader>
+            <Card className="border-slate-200">
+              <CardHeader className="py-3 px-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle>Document Types</CardTitle>
+                  <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                    <Upload className="h-4 w-4 text-orange-600" />
+                    Document Types
+                    <span className="text-xs font-normal text-slate-400">{documentTypes.length}</span>
+                  </CardTitle>
                   <Button onClick={() => handleCreate('documentType')}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Document Type
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-4 pb-4 pt-0">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 text-sm font-medium text-slate-700">Name</th>
-                      <th className="text-left p-3 text-sm font-medium text-slate-700">Description</th>
-                      <th className="text-right p-3 text-sm font-medium text-slate-700">Actions</th>
+                    <tr className="border-b border-slate-200">
+                      <th className="text-left p-2 text-xs font-medium text-slate-500">Name</th>
+                      <th className="text-left p-2 text-xs font-medium text-slate-500">Description</th>
+                      <th className="text-right p-2 text-xs font-medium text-slate-500">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {documentTypes.map((type) => (
-                      <tr key={type.id} className="border-b hover:bg-slate-50">
-                        <td className="p-3 font-medium text-slate-900">{type.name}</td>
-                        <td className="p-3 text-sm text-slate-600">{type.description || 'N/A'}</td>
-                        <td className="p-3">
+                      <tr key={type.id} className="border-b border-slate-100 hover:bg-slate-50">
+                        <td className="p-2 text-xs font-medium text-slate-900">{type.name}</td>
+                        <td className="p-2 text-xs text-slate-600">{type.description || 'N/A'}</td>
+                        <td className="p-2">
                           <div className="flex justify-end gap-2">
                             <Button variant="ghost" size="sm" onClick={() => handleEdit('documentType', type)}>
                               <Edit className="h-4 w-4" />

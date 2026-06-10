@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -214,62 +214,65 @@ export default function UsersAdminPage() {
         </div>
 
         {/* Users Table */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>All Users</CardTitle>
-                <CardDescription>Manage user accounts, groups, and permissions</CardDescription>
-              </div>
-              <div className="relative w-80">
+        <Card className="border-slate-200">
+          <CardHeader className="py-3 px-4">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                <Users className="h-4 w-4 text-emerald-600" />
+                All Users
+                <span className="text-xs font-normal text-slate-400">{users.length}</span>
+              </CardTitle>
+              <div className="relative w-72 ml-auto">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
                   placeholder="Search by email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-9"
                 />
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 pb-4 pt-0">
             {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-                <p className="text-slate-600 mt-4">Loading users...</p>
+              <div className="flex items-center justify-center py-16">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mx-auto" />
+                  <p className="mt-3 text-sm text-slate-600">Loading users...</p>
+                </div>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Groups</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Last Sign In</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="h-9 text-xs">Email</TableHead>
+                    <TableHead className="h-9 text-xs">Groups</TableHead>
+                    <TableHead className="h-9 text-xs">Status</TableHead>
+                    <TableHead className="h-9 text-xs">Last Sign In</TableHead>
+                    <TableHead className="h-9 text-xs">Created</TableHead>
+                    <TableHead className="h-9 text-xs text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12 text-slate-500">
+                      <TableCell colSpan={6} className="text-center py-12 text-xs text-slate-500">
                         {searchQuery ? 'No users found matching your search' : 'No users yet. Create your first user to get started.'}
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredUsers.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell>
+                        <TableCell className="py-2 text-xs">
                           <div className="flex items-center gap-2">
-                            <Mail className="h-4 w-4 text-slate-400" />
+                            <Mail className="h-3.5 w-3.5 text-slate-400" />
                             <span className="font-medium">{user.email}</span>
                             {user.email_confirmed_at && (
-                              <CheckCircle className="h-4 w-4 text-emerald-600" />
+                              <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="py-2 text-xs">
                           <div className="flex flex-wrap gap-1">
                             {user.groups.length === 0 ? (
                               <Badge variant="outline" className="text-amber-600 border-amber-300">
@@ -288,7 +291,7 @@ export default function UsersAdminPage() {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="py-2 text-xs">
                           {user.email_confirmed_at ? (
                             <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300">
                               <CheckCircle className="h-3 w-3 mr-1" />
@@ -301,21 +304,21 @@ export default function UsersAdminPage() {
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="py-2 text-xs">
                           {user.last_sign_in_at ? (
-                            <span className="text-sm text-slate-600">
+                            <span className="text-xs text-slate-600">
                               {format(new Date(user.last_sign_in_at), 'MMM d, yyyy')}
                             </span>
                           ) : (
-                            <span className="text-sm text-slate-400">Never</span>
+                            <span className="text-xs text-slate-400">Never</span>
                           )}
                         </TableCell>
-                        <TableCell>
-                          <span className="text-sm text-slate-600">
+                        <TableCell className="py-2 text-xs">
+                          <span className="text-xs text-slate-600">
                             {format(new Date(user.created_at), 'MMM d, yyyy')}
                           </span>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="py-2 text-xs">
                           <div className="flex items-center justify-end gap-2">
                             <Button
                               variant="outline"

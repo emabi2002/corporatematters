@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -322,7 +322,10 @@ export default function GroupManagementPage() {
     return (
       <AppLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mx-auto" />
+            <p className="mt-3 text-sm text-slate-600">Loading groups...</p>
+          </div>
         </div>
       </AppLayout>
     );
@@ -353,12 +356,15 @@ export default function GroupManagementPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Groups List */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>Groups ({groups.length})</CardTitle>
-              <CardDescription>Select a group to manage permissions</CardDescription>
+          <Card className="border-slate-200 lg:col-span-1">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                <Users className="h-4 w-4 text-blue-600" />
+                Groups
+                <span className="ml-auto text-xs font-normal text-slate-400">{groups.length}</span>
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 pb-4 pt-0">
               <div className="space-y-2">
                 {/* Create Form */}
                 {isCreating && (
@@ -471,31 +477,26 @@ export default function GroupManagementPage() {
           </Card>
 
           {/* Permissions Matrix */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>
-                    {selectedGroup ? `Permissions: ${selectedGroup.group_name}` : 'Select a Group'}
-                  </CardTitle>
-                  <CardDescription>
-                    {selectedGroup
-                      ? 'Configure module permissions for this group'
-                      : 'Choose a group from the list to manage its permissions'}
-                  </CardDescription>
-                </div>
+          <Card className="border-slate-200 lg:col-span-2">
+            <CardHeader className="py-3 px-4">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-sm flex items-center gap-2 text-slate-700">
+                  <Shield className="h-4 w-4 text-emerald-600" />
+                  {selectedGroup ? `Permissions: ${selectedGroup.group_name}` : 'Select a Group'}
+                </CardTitle>
                 {selectedGroup && (
                   <Button
                     onClick={savePermissions}
                     disabled={saving}
-                    className="bg-emerald-600 hover:bg-emerald-700"
+                    size="sm"
+                    className="ml-auto bg-emerald-600 hover:bg-emerald-700"
                   >
                     {saving ? 'Saving...' : 'Save Permissions'}
                   </Button>
                 )}
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 pb-4 pt-0">
               {!selectedGroup ? (
                 <div className="text-center py-12 text-slate-500">
                   <Shield className="h-12 w-12 mx-auto mb-4 text-slate-300" />
@@ -505,70 +506,70 @@ export default function GroupManagementPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left p-3 text-sm font-medium">Module</th>
-                        <th className="text-center p-3 text-sm font-medium">Read</th>
-                        <th className="text-center p-3 text-sm font-medium">Create</th>
-                        <th className="text-center p-3 text-sm font-medium">Update</th>
-                        <th className="text-center p-3 text-sm font-medium">Delete</th>
-                        <th className="text-center p-3 text-sm font-medium">Print</th>
-                        <th className="text-center p-3 text-sm font-medium">Approve</th>
-                        <th className="text-center p-3 text-sm font-medium">Export</th>
-                        <th className="text-center p-3 text-sm font-medium">All</th>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left p-2 text-xs font-medium text-slate-500">Module</th>
+                        <th className="text-center p-2 text-xs font-medium text-slate-500">Read</th>
+                        <th className="text-center p-2 text-xs font-medium text-slate-500">Create</th>
+                        <th className="text-center p-2 text-xs font-medium text-slate-500">Update</th>
+                        <th className="text-center p-2 text-xs font-medium text-slate-500">Delete</th>
+                        <th className="text-center p-2 text-xs font-medium text-slate-500">Print</th>
+                        <th className="text-center p-2 text-xs font-medium text-slate-500">Approve</th>
+                        <th className="text-center p-2 text-xs font-medium text-slate-500">Export</th>
+                        <th className="text-center p-2 text-xs font-medium text-slate-500">All</th>
                       </tr>
                     </thead>
                     <tbody>
                       {permissions.map((row) => (
-                        <tr key={row.module_id} className="border-b hover:bg-slate-50">
-                          <td className="p-3">
+                        <tr key={row.module_id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="p-2">
                             <div>
-                              <div className="font-medium text-sm">{row.module_name}</div>
+                              <div className="text-xs font-medium">{row.module_name}</div>
                               <div className="text-xs text-slate-500">{row.module_key}</div>
                             </div>
                           </td>
-                          <td className="text-center p-3">
+                          <td className="text-center p-2">
                             <Checkbox
                               checked={row.permissions.can_read}
                               onCheckedChange={() => togglePermission(row.module_id, 'can_read')}
                             />
                           </td>
-                          <td className="text-center p-3">
+                          <td className="text-center p-2">
                             <Checkbox
                               checked={row.permissions.can_create}
                               onCheckedChange={() => togglePermission(row.module_id, 'can_create')}
                             />
                           </td>
-                          <td className="text-center p-3">
+                          <td className="text-center p-2">
                             <Checkbox
                               checked={row.permissions.can_update}
                               onCheckedChange={() => togglePermission(row.module_id, 'can_update')}
                             />
                           </td>
-                          <td className="text-center p-3">
+                          <td className="text-center p-2">
                             <Checkbox
                               checked={row.permissions.can_delete}
                               onCheckedChange={() => togglePermission(row.module_id, 'can_delete')}
                             />
                           </td>
-                          <td className="text-center p-3">
+                          <td className="text-center p-2">
                             <Checkbox
                               checked={row.permissions.can_print}
                               onCheckedChange={() => togglePermission(row.module_id, 'can_print')}
                             />
                           </td>
-                          <td className="text-center p-3">
+                          <td className="text-center p-2">
                             <Checkbox
                               checked={row.permissions.can_approve}
                               onCheckedChange={() => togglePermission(row.module_id, 'can_approve')}
                             />
                           </td>
-                          <td className="text-center p-3">
+                          <td className="text-center p-2">
                             <Checkbox
                               checked={row.permissions.can_export}
                               onCheckedChange={() => togglePermission(row.module_id, 'can_export')}
                             />
                           </td>
-                          <td className="text-center p-3">
+                          <td className="text-center p-2">
                             <Checkbox
                               checked={Object.values(row.permissions).every(v => v)}
                               onCheckedChange={(checked) =>
