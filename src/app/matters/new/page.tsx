@@ -29,7 +29,7 @@ import {
   ACTION_TYPES,
   SLA_CONSTANTS,
 } from '@/lib/workflow-constants';
-import { MATTER_TYPES, REQUEST_FORMS, REQUEST_TYPES, LEASE_TYPES } from '@/lib/constants';
+import { useReferenceData } from '@/lib/reference-data';
 
 type Matter = Database['public']['Tables']['corporate_matters']['Row'];
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -99,6 +99,7 @@ export default function NewMatterPage() {
   const router = useRouter();
   const { user } = useAuth();
   const supabase = createClient();
+  const ref = useReferenceData();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -418,7 +419,7 @@ export default function NewMatterPage() {
                         <SelectValue placeholder="Select matter type" />
                       </SelectTrigger>
                       <SelectContent>
-                        {MATTER_TYPES.map((type) => (
+                        {ref.matterTypes.map((type) => (
                           <SelectItem key={type} value={type}>
                             {type}
                           </SelectItem>
@@ -437,7 +438,7 @@ export default function NewMatterPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.values(PRIORITIES).map((priority) => (
+                        {ref.priorities.map((priority) => (
                           <SelectItem key={priority} value={priority}>
                             {priority}
                           </SelectItem>
@@ -457,7 +458,7 @@ export default function NewMatterPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.values(CONFIDENTIALITY_LEVELS).map((level) => (
+                      {ref.confidentialityLevels.map((level) => (
                         <SelectItem key={level} value={level}>
                           {level}
                         </SelectItem>
@@ -562,7 +563,7 @@ export default function NewMatterPage() {
                           <SelectValue placeholder="Select form" />
                         </SelectTrigger>
                         <SelectContent>
-                          {REQUEST_FORMS.map((form) => (
+                          {ref.requestForms.map((form) => (
                             <SelectItem key={form} value={form}>
                               {form}
                             </SelectItem>
@@ -583,7 +584,7 @@ export default function NewMatterPage() {
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                         <SelectContent>
-                          {REQUEST_TYPES.map((type) => (
+                          {ref.requestTypes.map((type) => (
                             <SelectItem key={type} value={type}>
                               {type}
                             </SelectItem>
@@ -662,7 +663,7 @@ export default function NewMatterPage() {
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                           <SelectContent>
-                            {LEASE_TYPES.map((type) => (
+                            {ref.leaseTypes.map((type) => (
                               <SelectItem key={type} value={type}>
                                 {type}
                               </SelectItem>

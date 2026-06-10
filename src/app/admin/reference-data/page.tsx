@@ -138,55 +138,44 @@ export default function ReferenceDataPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Header */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <Link href="/admin">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-emerald-900">Reference Data Management</h1>
-            <p className="text-emerald-700 mt-1">Manage divisions, matter types, and document types</p>
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-slate-900">Reference Data Management</h1>
+            <p className="text-sm text-slate-500">Manage divisions, matter types, and document types</p>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-l-4 border-l-blue-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm text-slate-600 flex items-center gap-2">
-                <Building2 className="h-4 w-4" />
-                Divisions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-700">{divisions.length}</div>
-            </CardContent>
-          </Card>
-          <Card className="border-l-4 border-l-green-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm text-slate-600 flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Matter Types
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-700">{matterTypes.length}</div>
-            </CardContent>
-          </Card>
-          <Card className="border-l-4 border-l-orange-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm text-slate-600 flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                Document Types
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-700">{documentTypes.length}</div>
-            </CardContent>
-          </Card>
+        {/* Stats tiles */}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Divisions', value: divisions.length, icon: Building2, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: 'Matter Types', value: matterTypes.length, icon: FileText, color: 'text-green-600', bg: 'bg-green-50' },
+            { label: 'Document Types', value: documentTypes.length, icon: Upload, color: 'text-orange-600', bg: 'bg-orange-50' },
+          ].map((s) => {
+            const Icon = s.icon;
+            return (
+              <Card key={s.label} className="border-slate-200">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500 truncate">{s.label}</p>
+                      <p className="text-2xl font-bold text-slate-900 leading-tight">{s.value}</p>
+                    </div>
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg flex-shrink-0 ${s.bg}`}>
+                      <Icon className={`h-5 w-5 ${s.color}`} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Tabs */}

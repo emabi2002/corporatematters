@@ -226,7 +226,7 @@ export default function DocumentTypesPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -236,13 +236,13 @@ export default function DocumentTypesPage() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-emerald-900">Document Types</h1>
-              <p className="text-emerald-700 mt-1">
+              <h1 className="text-2xl font-bold text-slate-900">Document Types</h1>
+              <p className="text-sm text-slate-500">
                 {filteredDocumentTypes.length} type{filteredDocumentTypes.length !== 1 ? 's' : ''}
               </p>
             </div>
           </div>
-          <Button onClick={handleCreate} className="bg-gradient-to-r from-emerald-600 to-teal-600">
+          <Button onClick={handleCreate} size="sm" className="bg-emerald-600 hover:bg-emerald-700">
             <Plus className="h-4 w-4 mr-2" />
             Add Document Type
           </Button>
@@ -250,7 +250,7 @@ export default function DocumentTypesPage() {
 
         {/* Search */}
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="p-3">
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
               <Input

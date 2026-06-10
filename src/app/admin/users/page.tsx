@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
+import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -168,19 +169,17 @@ export default function UsersAdminPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <AppLayout>
+      <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-              <Users className="h-8 w-8 text-emerald-600" />
-              User Management
-            </h1>
-            <p className="text-slate-600 mt-1">Manage user accounts and group assignments</p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
+            <p className="text-sm text-slate-500">Manage user accounts and group assignments</p>
           </div>
           <Button
             onClick={() => setCreateUserDialogOpen(true)}
+            size="sm"
             className="gap-2 bg-emerald-600 hover:bg-emerald-700"
           >
             <UserPlus className="h-4 w-4" />
@@ -188,34 +187,30 @@ export default function UsersAdminPage() {
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">Total Users</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{users.length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">Confirmed Emails</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-emerald-600">
-                {users.filter(u => u.email_confirmed_at).length}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">Available Groups</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-600">{groups.length}</div>
-            </CardContent>
-          </Card>
+        {/* Stats tiles */}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Total Users', value: users.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: 'Confirmed Emails', value: users.filter(u => u.email_confirmed_at).length, icon: UserCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: 'Available Groups', value: groups.length, icon: Shield, color: 'text-orange-600', bg: 'bg-orange-50' },
+          ].map((s) => {
+            const Icon = s.icon;
+            return (
+              <Card key={s.label} className="border-slate-200">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500 truncate">{s.label}</p>
+                      <p className="text-2xl font-bold text-slate-900 leading-tight">{s.value}</p>
+                    </div>
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg flex-shrink-0 ${s.bg}`}>
+                      <Icon className={`h-5 w-5 ${s.color}`} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Users Table */}
@@ -399,6 +394,6 @@ export default function UsersAdminPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </AppLayout>
   );
 }

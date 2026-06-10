@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
+import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -319,23 +320,22 @@ export default function GroupManagementPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
-      </div>
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <AppLayout>
+      <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-              <Shield className="h-8 w-8 text-emerald-600" />
-              Group Management
-            </h1>
-            <p className="text-slate-600 mt-1">Manage user groups and permissions</p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-slate-900">Group Management</h1>
+            <p className="text-sm text-slate-500">Manage user groups and permissions</p>
           </div>
           <Button
             onClick={() => {
@@ -343,6 +343,7 @@ export default function GroupManagementPage() {
               setEditingGroupId(null);
               setGroupForm({ group_name: '', description: '' });
             }}
+            size="sm"
             className="gap-2 bg-emerald-600 hover:bg-emerald-700"
           >
             <Plus className="h-4 w-4" />
@@ -350,7 +351,7 @@ export default function GroupManagementPage() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Groups List */}
           <Card className="lg:col-span-1">
             <CardHeader>
@@ -585,6 +586,6 @@ export default function GroupManagementPage() {
           </Card>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

@@ -3,8 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { usePermissions } from '@/hooks/usePermissions';
 import {
   Users,
@@ -93,50 +92,65 @@ export default function AdminPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-emerald-900">Administration</h1>
-          <p className="text-emerald-700 mt-1">System management and configuration</p>
-          <p className="text-sm text-slate-600 mt-2">Your role: {roleDescription}</p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-slate-900">Administration</h1>
+            <p className="text-sm text-slate-500">
+              System management &amp; configuration · Your role: {roleDescription}
+            </p>
+          </div>
+          <div className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 flex-shrink-0">
+            <UserCog className="h-5 w-5 text-emerald-600" />
+          </div>
         </div>
 
-        {/* Welcome Card */}
-        <Card className="border-l-4 border-l-emerald-500">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserCog className="h-6 w-6 text-emerald-600" />
-              Welcome to the Admin Panel
-            </CardTitle>
-            <CardDescription>
-              Manage users, reference data, and system settings. You have access to {availableSections.length} admin
-              sections based on your role.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        {/* Quick Stats tiles */}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Total Users', value: '-', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: 'Active Sessions', value: '-', icon: Shield, color: 'text-green-600', bg: 'bg-green-50' },
+            { label: 'System Health', value: 'Good', icon: BarChart3, color: 'text-orange-600', bg: 'bg-orange-50' },
+          ].map((s) => {
+            const Icon = s.icon;
+            return (
+              <Card key={s.label} className="border-slate-200">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500 truncate">{s.label}</p>
+                      <p className="text-2xl font-bold text-slate-900 leading-tight">{s.value}</p>
+                    </div>
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg flex-shrink-0 ${s.bg}`}>
+                      <Icon className={`h-5 w-5 ${s.color}`} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
         {/* Admin Sections Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {availableSections.map((section) => {
             const Icon = section.icon;
             return (
-              <Link key={section.href} href={section.href}>
-                <Card className={`border-l-4 ${section.color} hover:shadow-lg transition-shadow cursor-pointer h-full`}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="flex items-center gap-2 text-lg">
-                          <Icon className={`h-5 w-5 ${section.iconColor}`} />
+              <Link key={section.href} href={section.href} className="group">
+                <Card className="border-slate-200 hover:border-emerald-300 hover:shadow-sm transition-all cursor-pointer h-full">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 flex-shrink-0">
+                        <Icon className={`h-5 w-5 ${section.iconColor}`} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
                           {section.title}
-                        </CardTitle>
-                        <CardDescription className="mt-2">{section.description}</CardDescription>
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">{section.description}</p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Manage →
-                    </Button>
                   </CardContent>
                 </Card>
               </Link>
@@ -144,59 +158,11 @@ export default function AdminPage() {
           })}
         </div>
 
-        {/* Quick Stats */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-emerald-600" />
-              System Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-blue-600 font-medium">Total Users</p>
-                    <p className="text-2xl font-bold text-blue-900 mt-1">-</p>
-                  </div>
-                  <Users className="h-8 w-8 text-blue-400" />
-                </div>
-              </div>
-
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-green-600 font-medium">Active Sessions</p>
-                    <p className="text-2xl font-bold text-green-900 mt-1">-</p>
-                  </div>
-                  <Shield className="h-8 w-8 text-green-400" />
-                </div>
-              </div>
-
-              <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-orange-600 font-medium">System Health</p>
-                    <p className="text-2xl font-bold text-orange-900 mt-1">Good</p>
-                  </div>
-                  <BarChart3 className="h-8 w-8 text-orange-400" />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Help Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Need Help?</CardTitle>
-            <CardDescription>
-              Administrative functions require proper permissions. Contact the system administrator if you need access to
-              additional features.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        {/* Help note */}
+        <p className="text-xs text-slate-400">
+          Administrative functions require proper permissions. Contact the system administrator if you need access to
+          additional features.
+        </p>
       </div>
     </AppLayout>
   );

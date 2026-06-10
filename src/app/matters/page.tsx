@@ -349,6 +349,45 @@ function MattersPageContent() {
   const visibleColumns = columns.filter(c => c.visible);
   const activeFilterCount = Object.values(filters).filter(v => v !== 'all').length;
 
+  // Quick-filter pills (counts computed from the full matter set)
+  const quickFilters: { key: string; label: string; count: number }[] = [
+    { key: 'all', label: 'All', count: matters.length },
+    {
+      key: 'my',
+      label: 'My Matters',
+      count: matters.filter((m) => m.assigned_officer === user?.id).length,
+    },
+    {
+      key: 'active',
+      label: 'Active',
+      count: matters.filter(
+        (m) => m.status !== MATTER_STATUS.CLOSED && m.status !== MATTER_STATUS.COMPLETED
+      ).length,
+    },
+    {
+      key: 'pending_assignment',
+      label: 'Unassigned',
+      count: matters.filter((m) => !m.assigned_officer).length,
+    },
+    {
+      key: 'pending_review',
+      label: 'In Review',
+      count: matters.filter((m) => m.workflow_stage === WORKFLOW_STAGES.PENDING_REVIEW).length,
+    },
+    {
+      key: 'overdue',
+      label: 'Overdue',
+      count: matters.filter((m) => isMatterOverdue(m.due_date, m.status)).length,
+    },
+    {
+      key: 'closed',
+      label: 'Closed',
+      count: matters.filter(
+        (m) => m.status === MATTER_STATUS.CLOSED || m.status === MATTER_STATUS.COMPLETED
+      ).length,
+    },
+  ];
+
   if (loading) {
     return (
       <AppLayout>
@@ -369,24 +408,14 @@ function MattersPageContent() {
         <div className="flex justify-between items-center gap-3">
           <div className="min-w-0">
             <h1 className="text-2xl font-bold text-slate-900">Matter Register</h1>
-            <div className="text-sm text-slate-500 flex items-center gap-2 flex-wrap">
-              <span>Showing {filteredMatters.length} of {matters.length} matters</span>
+            <p className="text-sm text-slate-500">
+              Showing {filteredMatters.length} of {matters.length} matters
               {quickFilter !== 'all' && (
-                <Badge
-                  variant="outline"
-                  className="bg-emerald-50 text-emerald-700 border-emerald-200 gap-1 font-medium"
-                >
-                  {QUICK_FILTER_LABELS[quickFilter] || quickFilter}
-                  <button
-                    onClick={() => setQuickFilter('all')}
-                    className="hover:text-emerald-900"
-                    aria-label="Clear quick filter"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
+                <span className="text-emerald-700 font-medium">
+                  {' '}· {QUICK_FILTER_LABELS[quickFilter] || quickFilter}
+                </span>
               )}
-            </div>
+            </p>
           </div>
           <Link href="/matters/new">
             <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0">
@@ -394,6 +423,33 @@ function MattersPageContent() {
               Register New Matter
             </Button>
           </Link>
+        </div>
+
+        {/* Quick-filter pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+          {quickFilters.map((qf) => {
+            const active = quickFilter === qf.key;
+            return (
+              <button
+                key={qf.key}
+                onClick={() => setQuickFilter(qf.key)}
+                className={`group inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  active
+                    ? 'border-emerald-600 bg-emerald-600 text-white shadow-sm'
+                    : 'border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:text-emerald-700'
+                }`}
+              >
+                {qf.label}
+                <span
+                  className={`inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-semibold ${
+                    active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-emerald-50'
+                  }`}
+                >
+                  {qf.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Toolbar */}

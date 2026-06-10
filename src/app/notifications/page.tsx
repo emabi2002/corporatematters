@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase';
 import { format, formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
@@ -177,19 +176,35 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
   const readCount = notifications.filter(n => n.is_read).length;
+  const actionCount = notifications.filter(
+    (n) => n.type.includes('overdue') || n.type.includes('due_soon') || n.type.includes('returned')
+  ).length;
+
+  const summaryTiles = [
+    { label: 'Total', value: notifications.length, icon: Inbox, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Unread', value: unreadCount, icon: Bell, color: 'text-orange-600', bg: 'bg-orange-50' },
+    { label: 'Needs Action', value: actionCount, icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-50' },
+    { label: 'Read', value: readCount, icon: CheckCheck, color: 'text-green-600', bg: 'bg-green-50' },
+  ] as const;
+
+  const tabs = [
+    { key: 'all', label: 'All', count: notifications.length },
+    { key: 'unread', label: 'Unread', count: unreadCount },
+    { key: 'read', label: 'Read', count: readCount },
+  ];
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Notifications</h1>
-            <p className="text-slate-600 mt-1">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
+            <p className="text-sm text-slate-500">
               {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` : 'All caught up!'}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0">
             {unreadCount > 0 && (
               <Button variant="outline" size="sm" onClick={markAllAsRead}>
                 <CheckCheck className="h-4 w-4 mr-2" />
@@ -205,71 +220,66 @@ export default function NotificationsPage() {
           </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-l-4 border-l-blue-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                <Inbox className="h-4 w-4" />
-                Total Notifications
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-slate-900">{notifications.length}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-orange-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                <Bell className="h-4 w-4" />
-                Unread
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{unreadCount}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-green-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                <CheckCheck className="h-4 w-4" />
-                Read
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{readCount}</div>
-            </CardContent>
-          </Card>
+        {/* Summary tiles */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {summaryTiles.map((t) => {
+            const Icon = t.icon;
+            return (
+              <Card key={t.label} className="border-slate-200">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500 truncate">{t.label}</p>
+                      <p className="text-2xl font-bold text-slate-900 leading-tight">{t.value}</p>
+                    </div>
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg flex-shrink-0 ${t.bg}`}>
+                      <Icon className={`h-5 w-5 ${t.color}`} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
-        {/* Notifications List */}
-        <Card>
-          <CardHeader>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="all">
-                  All ({notifications.length})
-                </TabsTrigger>
-                <TabsTrigger value="unread">
-                  Unread ({unreadCount})
-                </TabsTrigger>
-                <TabsTrigger value="read">
-                  Read ({readCount})
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardHeader>
-          <CardContent>
+        {/* Filter pills */}
+        <div className="flex items-center gap-1.5">
+          {tabs.map((t) => {
+            const active = activeTab === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key)}
+                className={`group inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  active
+                    ? 'border-emerald-600 bg-emerald-600 text-white shadow-sm'
+                    : 'border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:text-emerald-700'
+                }`}
+              >
+                {t.label}
+                <span
+                  className={`inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-semibold ${
+                    active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}
+                >
+                  {t.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Notifications list */}
+        <Card className="border-slate-200">
+          <CardContent className="p-2">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
               </div>
             ) : filteredNotifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <Bell className="h-16 w-16 text-slate-300 mb-4" />
-                <p className="text-slate-600 text-center">
+                <Bell className="h-12 w-12 text-slate-300 mb-3" />
+                <p className="text-sm text-slate-500 text-center">
                   {activeTab === 'unread'
                     ? 'No unread notifications'
                     : activeTab === 'read'
@@ -278,96 +288,78 @@ export default function NotificationsPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="divide-y divide-slate-100">
                 {filteredNotifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`p-4 border rounded-lg transition-all ${
-                      !notification.is_read
-                        ? 'bg-blue-50/50 border-blue-200 hover:bg-blue-50'
-                        : 'bg-white border-slate-200 hover:bg-slate-50'
+                    className={`group flex items-start gap-3 px-3 py-2.5 transition-colors hover:bg-slate-50 ${
+                      !notification.is_read ? 'bg-emerald-50/40' : ''
                     }`}
                   >
-                    <div className="flex items-start gap-4">
-                      {/* Icon */}
-                      <div className="mt-0.5 flex-shrink-0">
-                        {getNotificationIcon(notification.type)}
+                    {/* Unread dot + icon */}
+                    <div className="relative mt-0.5 flex-shrink-0">
+                      {!notification.is_read && (
+                        <span className="absolute -left-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      )}
+                      <div className="scale-90">{getNotificationIcon(notification.type)}</div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3
+                          className={`text-sm truncate ${
+                            !notification.is_read ? 'font-semibold text-slate-900' : 'font-medium text-slate-700'
+                          }`}
+                        >
+                          {notification.title}
+                        </h3>
+                        <Badge
+                          variant="outline"
+                          className={`${getNotificationBadgeColor(notification.type)} text-[10px] py-0 px-1.5 whitespace-nowrap flex-shrink-0`}
+                        >
+                          {notification.type.replace(/_/g, ' ')}
+                        </Badge>
                       </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3
-                                className={`text-sm ${
-                                  !notification.is_read ? 'font-semibold' : 'font-medium'
-                                } text-slate-900`}
-                              >
-                                {notification.title}
-                              </h3>
-                              {!notification.is_read && (
-                                <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300 text-xs">
-                                  New
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-slate-600 mb-2">
-                              {notification.message}
-                            </p>
-                            {notification.matter_number && notification.matter_id && (
-                              <Link href={`/matters/${notification.matter_id}`}>
-                                <Button
-                                  variant="link"
-                                  size="sm"
-                                  className="h-auto p-0 text-emerald-700 hover:text-emerald-900"
-                                  onClick={() => markAsRead(notification.id)}
-                                >
-                                  View {notification.matter_number} →
-                                </Button>
-                              </Link>
-                            )}
-                          </div>
-
-                          {/* Type Badge */}
-                          <Badge variant="outline" className={`${getNotificationBadgeColor(notification.type)} text-xs whitespace-nowrap`}>
-                            {notification.type.replace(/_/g, ' ')}
-                          </Badge>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-slate-200">
-                          <span className="text-xs text-slate-500">
-                            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                            <span className="mx-2">•</span>
-                            {format(new Date(notification.created_at), 'MMM dd, yyyy h:mm a')}
-                          </span>
-
-                          {/* Actions */}
-                          <div className="flex gap-1">
-                            {!notification.is_read && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 text-xs"
-                                onClick={() => markAsRead(notification.id)}
-                              >
-                                <Check className="h-3 w-3 mr-1" />
-                                Mark read
-                              </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => deleteNotification(notification.id)}
-                            >
-                              <X className="h-3 w-3 mr-1" />
-                              Delete
-                            </Button>
-                          </div>
-                        </div>
+                      <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">{notification.message}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[11px] text-slate-400 whitespace-nowrap">
+                          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                        </span>
+                        {notification.matter_number && notification.matter_id && (
+                          <Link
+                            href={`/matters/${notification.matter_id}`}
+                            onClick={() => markAsRead(notification.id)}
+                            className="text-[11px] font-medium text-emerald-700 hover:text-emerald-900 hover:underline whitespace-nowrap"
+                          >
+                            View {notification.matter_number} →
+                          </Link>
+                        )}
                       </div>
+                    </div>
+
+                    {/* Actions (reveal on hover) */}
+                    <div className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {!notification.is_read && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-slate-500 hover:text-emerald-700"
+                          title="Mark read"
+                          onClick={() => markAsRead(notification.id)}
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-slate-400 hover:text-red-600 hover:bg-red-50"
+                        title="Delete"
+                        onClick={() => deleteNotification(notification.id)}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 ))}

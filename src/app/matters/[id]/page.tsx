@@ -181,184 +181,208 @@ export default function MatterDetailsPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4 flex-1 min-w-0">
-            <Link href="/matters">
-              <Button variant="ghost" size="icon" className="hover:bg-white/50 flex-shrink-0">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-3xl font-bold text-emerald-900 truncate">{matter.matter_number}</h1>
-              <p className="text-emerald-700 mt-1 truncate">{matter.subject || matter.type_of_matter}</p>
+      <div className="max-w-[1600px] mx-auto space-y-4">
+        {/* Compact header strip */}
+        <Card className="border-slate-200">
+          <CardContent className="p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Link href="/matters">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h1 className="text-xl font-bold text-slate-900 truncate">{matter.matter_number}</h1>
+                    <Badge variant="outline" className={getWorkflowStageColor(matter.workflow_stage)}>
+                      {matter.workflow_stage}
+                    </Badge>
+                    <Badge variant="outline" className={getPriorityColor(matter.priority)}>
+                      {matter.priority}
+                    </Badge>
+                    <Badge variant="outline">{matter.status}</Badge>
+                    {isOverdue && (
+                      <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
+                        Overdue
+                      </Badge>
+                    )}
+                    {isDueSoon && (
+                      <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                        Due Soon
+                      </Badge>
+                    )}
+                    {matter.confidentiality_level && (
+                      <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-300">
+                        {matter.confidentiality_level}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-slate-500 truncate mt-0.5">
+                    {matter.subject || matter.type_of_matter}
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex gap-2 flex-shrink-0">
+                {!matter.assigned_officer && (
+                  <Link href={`/matters/${matter.id}/assign`}>
+                    <Button variant="outline" size="sm">
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Assign
+                    </Button>
+                  </Link>
+                )}
+                {matter.workflow_stage !== WORKFLOW_STAGES.CLOSED && (
+                  <Link href={`/matters/${matter.id}/details`}>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Details
+                    </Button>
+                  </Link>
+                )}
+                {matter.workflow_stage === WORKFLOW_STAGES.FINALIZED && (
+                  <Link href={`/matters/${matter.id}/close`}>
+                    <Button variant="outline" size="sm">
+                      <Lock className="h-4 w-4 mr-2" />
+                      Close Matter
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="flex gap-2 flex-shrink-0">
-            {!matter.assigned_officer && (
-              <Link href={`/matters/${matter.id}/assign`}>
-                <Button variant="outline" size="sm">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Assign
-                </Button>
-              </Link>
-            )}
-            {matter.workflow_stage !== WORKFLOW_STAGES.CLOSED && (
-              <Link href={`/matters/${matter.id}/details`}>
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Details
-                </Button>
-              </Link>
-            )}
-            {matter.workflow_stage === WORKFLOW_STAGES.FINALIZED && (
-              <Link href={`/matters/${matter.id}/close`}>
-                <Button variant="outline" size="sm">
-                  <Lock className="h-4 w-4 mr-2" />
-                  Close Matter
-                </Button>
-              </Link>
-            )}
-          </div>
-        </div>
-
-        {/* Status Badges */}
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" className={getWorkflowStageColor(matter.workflow_stage)}>
-            {matter.workflow_stage}
-          </Badge>
-          <Badge variant="outline" className={getPriorityColor(matter.priority)}>
-            {matter.priority}
-          </Badge>
-          <Badge variant="outline">{matter.status}</Badge>
-          {isOverdue && (
-            <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
-              Overdue
-            </Badge>
-          )}
-          {isDueSoon && (
-            <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
-              Due Soon
-            </Badge>
-          )}
-          {matter.confidentiality_level && (
-            <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-300">
-              {matter.confidentiality_level}
-            </Badge>
-          )}
-        </div>
+          </CardContent>
+        </Card>
 
         {/* 10-Tab Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 h-auto">
-            <TabsTrigger value="overview" className="text-xs lg:text-sm">
-              <BarChart3 className="h-4 w-4 mr-1 hidden lg:inline" />
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 h-auto p-1 gap-0.5">
+            <TabsTrigger value="overview" className="text-[11px] lg:text-xs py-1.5">
+              <BarChart3 className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="registration" className="text-xs lg:text-sm">
-              <FileText className="h-4 w-4 mr-1 hidden lg:inline" />
+            <TabsTrigger value="registration" className="text-[11px] lg:text-xs py-1.5">
+              <FileText className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Registration
             </TabsTrigger>
-            <TabsTrigger value="assignment" className="text-xs lg:text-sm">
-              <User className="h-4 w-4 mr-1 hidden lg:inline" />
+            <TabsTrigger value="assignment" className="text-[11px] lg:text-xs py-1.5">
+              <User className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Assignment
             </TabsTrigger>
-            <TabsTrigger value="land" className="text-xs lg:text-sm">
-              <MapPin className="h-4 w-4 mr-1 hidden lg:inline" />
+            <TabsTrigger value="land" className="text-[11px] lg:text-xs py-1.5">
+              <MapPin className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Land/Lease
             </TabsTrigger>
-            <TabsTrigger value="legal" className="text-xs lg:text-sm">
-              <Scale className="h-4 w-4 mr-1 hidden lg:inline" />
+            <TabsTrigger value="legal" className="text-[11px] lg:text-xs py-1.5">
+              <Scale className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Legal Issues
             </TabsTrigger>
-            <TabsTrigger value="documents" className="text-xs lg:text-sm">
-              <Upload className="h-4 w-4 mr-1 hidden lg:inline" />
+            <TabsTrigger value="documents" className="text-[11px] lg:text-xs py-1.5">
+              <Upload className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Documents
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="text-xs lg:text-sm">
-              <CheckCircle2 className="h-4 w-4 mr-1 hidden lg:inline" />
+            <TabsTrigger value="tasks" className="text-[11px] lg:text-xs py-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Tasks
             </TabsTrigger>
-            <TabsTrigger value="reviews" className="text-xs lg:text-sm">
-              <MessageSquare className="h-4 w-4 mr-1 hidden lg:inline" />
+            <TabsTrigger value="reviews" className="text-[11px] lg:text-xs py-1.5">
+              <MessageSquare className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Reviews
             </TabsTrigger>
-            <TabsTrigger value="timeline" className="text-xs lg:text-sm">
-              <Clock className="h-4 w-4 mr-1 hidden lg:inline" />
+            <TabsTrigger value="timeline" className="text-[11px] lg:text-xs py-1.5">
+              <Clock className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Timeline
             </TabsTrigger>
-            <TabsTrigger value="audit" className="text-xs lg:text-sm">
-              <Shield className="h-4 w-4 mr-1 hidden lg:inline" />
+            <TabsTrigger value="audit" className="text-[11px] lg:text-xs py-1.5">
+              <Shield className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Audit Trail
             </TabsTrigger>
           </TabsList>
 
           {/* Tab 1: Overview */}
-          <TabsContent value="overview" className="space-y-6">
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="border-l-4 border-l-blue-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-slate-600">Days Open</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-slate-900">{daysOpen}</div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Since {format(new Date(matter.created_at), 'MMM dd')}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-l-4 border-l-purple-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-slate-600">SLA Status</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {matter.due_date ? (
-                    <>
-                      <div className={`text-2xl font-bold ${isOverdue ? 'text-red-600' : isDueSoon ? 'text-yellow-600' : 'text-green-600'}`}>
-                        {isOverdue ? 'Overdue' : isDueSoon ? 'Due Soon' : 'On Track'}
-                      </div>
-                      <p className="text-xs text-slate-500 mt-1">
-                        Due {format(new Date(matter.due_date), 'MMM dd, yyyy')}
+          <TabsContent value="overview" className="space-y-4">
+            {/* Summary tiles */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <Card className="border-slate-200">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500 truncate">Days Open</p>
+                      <p className="text-2xl font-bold text-slate-900 leading-tight">{daysOpen}</p>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        Since {format(new Date(matter.created_at), 'MMM dd')}
                       </p>
-                    </>
-                  ) : (
-                    <div className="text-2xl font-bold text-slate-400">No SLA</div>
-                  )}
+                    </div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 flex-shrink-0">
+                      <Calendar className="h-5 w-5 text-blue-600" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-orange-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-slate-600">Revisions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-slate-900">
-                    {matter.returned_for_revision_count || 0}
+              <Card className="border-slate-200">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500 truncate">SLA Status</p>
+                      {matter.due_date ? (
+                        <>
+                          <p className={`text-lg font-bold leading-tight ${isOverdue ? 'text-red-600' : isDueSoon ? 'text-yellow-600' : 'text-green-600'}`}>
+                            {isOverdue ? 'Overdue' : isDueSoon ? 'Due Soon' : 'On Track'}
+                          </p>
+                          <p className="text-[11px] text-slate-400 truncate">
+                            Due {format(new Date(matter.due_date), 'MMM dd, yyyy')}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-lg font-bold text-slate-400 leading-tight">No SLA</p>
+                      )}
+                    </div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-50 flex-shrink-0">
+                      <Clock className="h-5 w-5 text-purple-600" />
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">Times returned</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-green-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-slate-600">Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-slate-900">
-                    {activityLogs.length}
+              <Card className="border-slate-200">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500 truncate">Revisions</p>
+                      <p className="text-2xl font-bold text-slate-900 leading-tight">
+                        {matter.returned_for_revision_count || 0}
+                      </p>
+                      <p className="text-[11px] text-slate-400 truncate">Times returned</p>
+                    </div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-50 flex-shrink-0">
+                      <AlertCircle className="h-5 w-5 text-orange-600" />
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">Total actions</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-slate-200">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500 truncate">Activity</p>
+                      <p className="text-2xl font-bold text-slate-900 leading-tight">
+                        {activityLogs.length}
+                      </p>
+                      <p className="text-[11px] text-slate-400 truncate">Total actions</p>
+                    </div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-50 flex-shrink-0">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Key Information */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -473,13 +497,13 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 2: Registration Details */}
-          <TabsContent value="registration" className="space-y-6">
+          <TabsContent value="registration" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Registration Information</CardTitle>
                 <CardDescription>Complete registration details for this matter</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4">
                 <div>
                   <h3 className="font-semibold text-sm text-slate-700 mb-3">Basic Information</h3>
                   <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -582,7 +606,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 3: Assignment History */}
-          <TabsContent value="assignment" className="space-y-6">
+          <TabsContent value="assignment" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -707,7 +731,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 4: Land/Lease Details */}
-          <TabsContent value="land" className="space-y-6">
+          <TabsContent value="land" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -717,7 +741,7 @@ export default function MatterDetailsPage() {
               </CardHeader>
               <CardContent>
                 {matter.land_description || matter.zoning || matter.survey_plan_no || matter.lease_type ? (
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {matter.land_description && (
                       <div>
                         <h3 className="font-semibold text-sm text-slate-700 mb-2">Land Description</h3>
@@ -839,7 +863,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 5: Legal Issues */}
-          <TabsContent value="legal" className="space-y-6">
+          <TabsContent value="legal" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -849,7 +873,7 @@ export default function MatterDetailsPage() {
               </CardHeader>
               <CardContent>
                 {matter.legal_issues || matter.claims_allegations || matter.applicable_law || matter.relevant_stakeholders ? (
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {matter.legal_issues && (
                       <div>
                         <h3 className="font-semibold text-sm text-slate-700 mb-2">Legal Issues</h3>
@@ -943,7 +967,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 8: Review Notes */}
-          <TabsContent value="reviews" className="space-y-6">
+          <TabsContent value="reviews" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -996,7 +1020,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 9: Timeline */}
-          <TabsContent value="timeline" className="space-y-6">
+          <TabsContent value="timeline" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1052,7 +1076,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 10: Audit Trail */}
-          <TabsContent value="audit" className="space-y-6">
+          <TabsContent value="audit" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
