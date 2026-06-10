@@ -270,9 +270,10 @@ export function Sidebar({
         )}
       >
         <div className="flex h-16 flex-shrink-0 items-center justify-center border-b border-slate-700 px-4">
-          <div className={cn('transition-all duration-300', collapsed ? 'w-8 h-8' : 'flex items-center gap-3')}>
-            <div className="w-8 h-8 rounded bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-sm">D</span>
+          <div className={cn('transition-all duration-300', collapsed ? 'h-9 w-9' : 'flex items-center gap-3')}>
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/dlpp-logo.svg" alt="DLPP" className="h-6 w-6" />
             </div>
             {!collapsed && (
               <div>

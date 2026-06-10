@@ -45,6 +45,13 @@
 - [x] admin/groups: removed dead `module_route` field (DB column is `route`)
 - [x] `bunx tsc --noEmit` => 0 errors; all routes still 200
 
+## Active tasks (round 2)
+- [ ] Compact density for Notifications page
+- [ ] Compact density for 10-tab Matter Detail page
+- [ ] Smart header search: live results dropdown (matters + documents)
+- [ ] Quick-filter tabs on Matters register (All / My / Active / Overdue ...)
+- [ ] Replace purple 'D' branding with official DLPP logo (login + sidebar)
+
 ## Active tasks (selected by user)
 - [x] Compact/dense layout for Matters register page (smaller header, p-3 toolbar, dense table)
 - [x] Compact/dense layout for Reports page (6 compact metric tiles, tight charts h=240)
@@ -52,7 +59,7 @@
       + matters page reads search/status/overdue/view params (sidebar links now work too)
       + removable quick-filter chip in the matters header
 - [x] Sidebar: Radix tooltips when collapsed (groups + items) + footer w/ user avatar+role
-- [ ] Commit changes to GitHub
+- [x] Commit changes to GitHub (re-init git -> origin/main; pushed 41fb200; .env.local kept out)
 
 ## Follow-up tasks (in progress)
 - [ ] Compact/dense layout for Matters register page (src/app/matters/page.tsx)

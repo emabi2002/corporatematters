@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="dlppG" x1="18" y1="14" x2="82" y2="86" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34d399" />
+      <stop offset="1" stop-color="#0d9488" />
+    </linearGradient>
+  </defs>
+  <!-- Outer survey triangle (Lands) -->
+  <path d="M50 13 L86 79 L14 79 Z" stroke="url(#dlppG)" stroke-width="7" stroke-linejoin="round" />
+  <!-- Inner filled apex triangle (Physical Planning) -->
+  <path d="M50 40 L66.5 69 L33.5 69 Z" fill="url(#dlppG)" />
+  <!-- Plumb / level mark -->
+  <path d="M50 22 L50 35" stroke="url(#dlppG)" stroke-width="5" stroke-linecap="round" />
+</svg>

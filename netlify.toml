@@ -4,6 +4,10 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # Public Supabase config (safe to expose: protected by Row-Level Security).
+  # The secret SUPABASE_SERVICE_ROLE_KEY is intentionally NOT included here.
+  NEXT_PUBLIC_SUPABASE_URL = "https://yvnkyjnwvylrweyzvibs.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2bmt5am53dnlscndleXp2aWJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3Mjg4NTMsImV4cCI6MjA3NzMwNDg1M30.dqZtNCoHekiN_qfxdZMMh_fKB9kJKzlDktykvAU2QEk"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
