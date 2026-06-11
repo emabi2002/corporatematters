@@ -121,35 +121,33 @@ export function AddUserDialog({ open, onOpenChange, onSuccess, groups }: AddUser
     try {
       const supabase = createClient();
 
-      // Create user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: formData.email,
-        password: formData.password,
-        email_confirm: true,
-        user_metadata: {
-          full_name: formData.full_name,
-          department: formData.department || null,
-        },
-      });
-
-      if (authError) throw authError;
-
-      if (!authData.user) {
-        throw new Error('Failed to create user');
+      // Get the current session token so the server can authorise the request.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('Your session has expired. Please sign in again.');
       }
 
-      // Assign user to group
-      const { data: { user } } = await supabase.auth.getUser();
-      const { error: groupError } = await supabase
-        .from('user_groups')
-        .insert({
-          user_id: authData.user.id,
+      // Create the user via the secure server route (uses the service-role key
+      // on the server only — never exposed to the browser).
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          full_name: formData.full_name,
+          department: formData.department || null,
           group_id: selectedGroupId,
-          assigned_by: user?.id || null,
-          is_active: true,
-        });
+        }),
+      });
 
-      if (groupError) throw groupError;
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.error || 'Failed to create user');
+      }
 
       toast.success('User created and assigned to group successfully!');
       onOpenChange(false);

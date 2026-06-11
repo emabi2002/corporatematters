@@ -143,3 +143,13 @@
 - [x] users, groups, divisions, document-types, matter-types, reference-data
 - [x] Content cards compacted; removed CardDescription; tables denser; loaders match Overview
 - [x] All /admin/* routes 200; lint exit 0
+
+## User Management display + secure admin API + officer names (DONE)
+- [x] Users page reads from profiles (RLS) instead of service-role-only auth.admin.listUsers — 19 users now show
+- [x] New secure server route /api/admin/users (POST create, DELETE) — validates caller Bearer token + admin role, uses service key server-only
+- [x] AddUserDialog now creates users via the API route (not client-side admin API)
+- [x] Users page delete now performs a true delete via the API route
+- [x] supabase-admin.ts server-only client factory (throws if SUPABASE_SERVICE_ROLE_KEY missing)
+- [x] Matters register "Assigned To" column now shows officer full name (profile map); column visible by default
+- [x] Production build passes; /api/admin/users is dynamic; 401 when unauth
+- [ ] PROD NOTE: set SUPABASE_SERVICE_ROLE_KEY in Netlify env (server-side, NOT in repo) for create/delete to work live

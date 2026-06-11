@@ -117,8 +117,11 @@ function MattersPageContent() {
     { key: 'requesting_division', label: 'Division', visible: false, sortable: false },
     { key: 'date_received', label: 'Date Received', visible: true, sortable: true },
     { key: 'due_date', label: 'Due Date', visible: true, sortable: true },
-    { key: 'assigned_officer', label: 'Assigned To', visible: false, sortable: false },
+    { key: 'assigned_officer', label: 'Assigned To', visible: true, sortable: false },
   ]);
+
+  // Map of user id -> display name, used to resolve the assigned officer.
+  const [profileMap, setProfileMap] = useState<Record<string, string>>({});
 
   const supabase = createClient();
 
@@ -145,13 +148,19 @@ function MattersPageContent() {
 
   const fetchMatters = async () => {
     try {
-      const { data, error } = await supabase
-        .from('corporate_matters')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const [mattersRes, profilesRes] = await Promise.all([
+        supabase.from('corporate_matters').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('id, full_name, email'),
+      ]);
 
-      if (error) throw error;
-      setMatters(data || []);
+      if (mattersRes.error) throw mattersRes.error;
+      setMatters(mattersRes.data || []);
+
+      const map: Record<string, string> = {};
+      (profilesRes.data || []).forEach((p: any) => {
+        map[p.id] = p.full_name || (p.email ? p.email.split('@')[0] : 'Unknown');
+      });
+      setProfileMap(map);
     } catch (error) {
       console.error('Error fetching matters:', error);
     } finally {
@@ -761,7 +770,11 @@ function MattersPageContent() {
                                 </span>
                               )}
                               {col.key === 'assigned_officer' && (
-                                <span className="text-slate-600">{matter.assigned_officer ? 'Assigned' : '-'}</span>
+                                <span className={matter.assigned_officer ? 'text-slate-700' : 'text-slate-400'}>
+                                  {matter.assigned_officer
+                                    ? profileMap[matter.assigned_officer] || 'Assigned'
+                                    : 'Unassigned'}
+                                </span>
                               )}
                             </td>
                           ))}
