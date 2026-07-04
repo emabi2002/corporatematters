@@ -254,7 +254,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Metric tiles */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div data-tour="dashboard-metrics" className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {metricTiles.map((m) => {
             const Icon = m.icon;
             return (
@@ -281,7 +281,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Workflow stage breakdown (compact strip) */}
-        <Card className="border-slate-200">
+        <Card data-tour="dashboard-charts" className="border-slate-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="h-4 w-4 text-emerald-600" />
@@ -386,7 +386,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Recent Activity */}
-          <Card className="border-slate-200">
+          <Card data-tour="dashboard-activity" className="border-slate-200">
             <CardHeader className="py-3 px-4">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Activity className="h-4 w-4 text-emerald-500" />

@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { NotificationBell } from '@/components/NotificationBell';
+import { HelpButton } from '@/components/help/HelpButton';
 import { usePermissions } from '@/hooks/usePermissions';
 import { createClient } from '@/lib/supabase';
 import { getWorkflowStageColor } from '@/lib/workflow-constants';
@@ -335,7 +336,7 @@ export function TopHeader({
         )}
 
         {/* Desktop smart search */}
-        <div ref={searchRef} className="relative hidden md:block">
+        <div ref={searchRef} data-tour="header-search" className="relative hidden md:block">
           <form onSubmit={handleSearch}>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -378,11 +379,16 @@ export function TopHeader({
           <Search className="h-5 w-5" />
         </Button>
 
-        <NotificationBell />
+        {/* Contextual help */}
+        <HelpButton variant="icon" className="hidden sm:inline-flex" />
+
+        <span data-tour="notification-bell" className="inline-flex">
+          <NotificationBell />
+        </span>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="gap-2">
+            <Button variant="ghost" className="gap-2" data-tour="user-menu">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-emerald-600 text-white text-xs">
                   {profile ? getInitials(profile.full_name || profile.email) : 'U'}

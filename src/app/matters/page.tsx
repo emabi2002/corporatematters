@@ -426,7 +426,7 @@ function MattersPageContent() {
               )}
             </p>
           </div>
-          <Link href="/matters/new">
+          <Link href="/matters/new" data-tour="matters-new">
             <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0">
               <Plus className="h-4 w-4 mr-2" />
               Register New Matter
@@ -435,7 +435,7 @@ function MattersPageContent() {
         </div>
 
         {/* Quick-filter pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+        <div data-tour="matters-filters" className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
           {quickFilters.map((qf) => {
             const active = quickFilter === qf.key;
             return (
@@ -466,7 +466,7 @@ function MattersPageContent() {
           <CardContent className="p-3">
             <div className="flex flex-col lg:flex-row gap-2">
               {/* Global Search */}
-              <div className="flex-1">
+              <div className="flex-1" data-tour="matters-search">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
@@ -525,7 +525,7 @@ function MattersPageContent() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button variant="outline" size="sm" onClick={exportToCSV}>
+                <Button variant="outline" size="sm" onClick={exportToCSV} data-tour="matters-export">
                   <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>
@@ -663,7 +663,7 @@ function MattersPageContent() {
         </Card>
 
         {/* Data Table */}
-        <Card>
+        <Card data-tour="matters-table">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full">

@@ -27,6 +27,8 @@ import {
   SLA_CONSTANTS,
 } from '@/lib/workflow-constants';
 import { notifyMatterAssigned } from '@/lib/notification-helpers';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
+import { HelpButton } from '@/components/help/HelpButton';
 import Link from 'next/link';
 
 type Matter = Database['public']['Tables']['corporate_matters']['Row'];
@@ -230,6 +232,7 @@ export default function AssignMatterPage() {
             <h1 className="text-3xl font-bold text-emerald-900">Assign Matter</h1>
             <p className="text-emerald-700 mt-1">{matter.matter_number}</p>
           </div>
+          <HelpButton variant="inline" articleId="matter-assignment" label="Help" />
         </div>
 
         {/* Matter Summary */}
@@ -264,9 +267,10 @@ export default function AssignMatterPage() {
             <CardDescription>Select an officer and provide instructions</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="assigned_to">
+            <div className="space-y-2" data-tour="assign-officer">
+              <Label htmlFor="assigned_to" className="flex items-center gap-1.5">
                 Assign to Officer <span className="text-red-500">*</span>
+                <HelpTooltip id="assign-officer" />
               </Label>
               <Select
                 value={formData.assigned_to}
@@ -287,8 +291,11 @@ export default function AssignMatterPage() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="instructions">Manager Instructions</Label>
+            <div className="space-y-2" data-tour="assign-instructions">
+              <Label htmlFor="instructions" className="flex items-center gap-1.5">
+                Manager Instructions
+                <HelpTooltip content="Explain the required output, scope and any special considerations. These instructions are visible to the assigned officer." />
+              </Label>
               <Textarea
                 id="instructions"
                 value={formData.instructions}
@@ -301,8 +308,11 @@ export default function AssignMatterPage() {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label>Due Date</Label>
+            <div className="space-y-2" data-tour="assign-due-date">
+              <Label className="flex items-center gap-1.5">
+                Due Date
+                <HelpTooltip id="due-date" />
+              </Label>
               <DatePicker
                 date={formData.due_date}
                 onSelect={(date) => setFormData((prev) => ({ ...prev, due_date: date }))}
@@ -330,6 +340,7 @@ export default function AssignMatterPage() {
               <Button
                 onClick={handleAssign}
                 disabled={submitting || !formData.assigned_to}
+                data-tour="assign-submit"
                 className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
               >
                 <UserPlus className="h-4 w-4" />

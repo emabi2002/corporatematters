@@ -38,6 +38,8 @@ import {
   Clock,
   FileCog,
   Shield,
+  LifeBuoy,
+  GraduationCap,
 } from 'lucide-react';
 
 interface NavItem {
@@ -146,6 +148,15 @@ export function Sidebar({
         { name: 'Matter Types', href: '/admin/matter-types', icon: ClipboardList, requireAdmin: true, moduleKey: 'corporate_matter_types' },
         { name: 'Document Types', href: '/admin/document-types', icon: FileType, requireAdmin: true, moduleKey: 'corporate_document_types' },
         { name: 'Reference Data', href: '/admin/reference-data', icon: Folder, requireAdmin: true, moduleKey: 'corporate_reference' },
+      ],
+    },
+    {
+      name: 'Help & Training',
+      icon: LifeBuoy,
+      defaultOpen: false,
+      items: [
+        { name: 'Help Centre', href: '/help', icon: LifeBuoy },
+        { name: 'Guided Tours', href: '/help?view=tours', icon: GraduationCap },
       ],
     },
   ];
@@ -262,6 +273,7 @@ export function Sidebar({
       )}
 
       <aside
+        data-tour="sidebar"
         className={cn(
           'fixed left-0 top-0 z-40 flex h-screen flex-col bg-slate-900 text-white transition-all duration-300',
           collapsed ? 'w-16' : 'w-64',

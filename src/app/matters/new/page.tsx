@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
+import { HelpButton } from '@/components/help/HelpButton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -317,9 +319,12 @@ export default function NewMatterPage() {
     <AppLayout>
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-emerald-900">Register New Matter</h1>
-          <p className="text-emerald-700 mt-1">Multi-step workflow registration process</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-bold text-emerald-900">Register New Matter</h1>
+            <p className="text-emerald-700 mt-1">Multi-step workflow registration process</p>
+          </div>
+          <HelpButton variant="inline" articleId="register-new-matter" label="Help" />
         </div>
 
         {/* Progress Steps */}
@@ -381,7 +386,7 @@ export default function NewMatterPage() {
           <CardContent className="space-y-6">
             {/* Step 1: Basic Information */}
             {currentStep === 1 && (
-              <div className="space-y-4">
+              <div className="space-y-4" data-tour="wizard-step-1">
                 <div className="space-y-2">
                   <Label htmlFor="subject">
                     Subject <span className="text-red-500">*</span>
@@ -408,8 +413,9 @@ export default function NewMatterPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="type_of_matter">
+                    <Label htmlFor="type_of_matter" className="flex items-center gap-1.5">
                       Type of Matter <span className="text-red-500">*</span>
+                      <HelpTooltip id="matter-type" />
                     </Label>
                     <Select
                       value={formData.type_of_matter}
@@ -429,7 +435,10 @@ export default function NewMatterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="priority">Priority</Label>
+                    <Label htmlFor="priority" className="flex items-center gap-1.5">
+                      Priority
+                      <HelpTooltip id="priority" />
+                    </Label>
                     <Select
                       value={formData.priority}
                       onValueChange={(value) => updateFormData('priority', value)}
@@ -471,7 +480,7 @@ export default function NewMatterPage() {
 
             {/* Step 2: Requester Details */}
             {currentStep === 2 && (
-              <div className="space-y-4">
+              <div className="space-y-4" data-tour="wizard-step-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="requester_name">
@@ -547,7 +556,7 @@ export default function NewMatterPage() {
 
             {/* Step 3: Request & Land Details */}
             {currentStep === 3 && (
-              <div className="space-y-6">
+              <div className="space-y-6" data-tour="wizard-step-3">
                 <div>
                   <h3 className="font-semibold text-lg mb-4">Request Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -732,7 +741,7 @@ export default function NewMatterPage() {
 
             {/* Step 4: Initial Documents */}
             {currentStep === 4 && (
-              <div className="space-y-4">
+              <div className="space-y-4" data-tour="wizard-step-4">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-sm text-blue-800">
                     <strong>Optional:</strong> Upload any initial documents such as request letters, memos, emails, or

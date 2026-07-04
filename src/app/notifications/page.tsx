@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpButton } from '@/components/help/HelpButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -331,6 +332,7 @@ export default function NotificationsPage() {
               <Plus className="h-4 w-4 mr-2" />
               New
             </Button>
+            <HelpButton variant="inline" articleId="notifications" label="Help" />
           </div>
         </div>
 
@@ -357,7 +359,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* Filter pills */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5" data-tour="notifications-tabs">
           {tabs.map((t) => {
             const active = activeTab === t.key;
             return (
@@ -384,7 +386,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* Notifications list */}
-        <Card className="border-slate-200">
+        <Card className="border-slate-200" data-tour="notifications-list">
           <CardContent className="p-2">
             {loading ? (
               <div className="flex items-center justify-center py-12">

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="800" height="300" fill="#f8fafc"/>
+  <text x="400" y="42" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">Corporate Matter Lifecycle</text>
+  <!-- connecting line -->
+  <line x1="90" y1="150" x2="710" y2="150" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4 4"/>
+  <!-- nodes -->
+  <g>
+    <circle cx="90" cy="150" r="30" fill="#10b981"/>
+    <circle cx="214" cy="150" r="30" fill="#0ea5e9"/>
+    <circle cx="338" cy="150" r="30" fill="#8b5cf6"/>
+    <circle cx="462" cy="150" r="30" fill="#f59e0b"/>
+    <circle cx="586" cy="150" r="30" fill="#14b8a6"/>
+    <circle cx="710" cy="150" r="30" fill="#64748b"/>
+  </g>
+  <g fill="#ffffff" font-size="15" font-weight="700" text-anchor="middle">
+    <text x="90" y="156">1</text>
+    <text x="214" y="156">2</text>
+    <text x="338" y="156">3</text>
+    <text x="462" y="156">4</text>
+    <text x="586" y="156">5</text>
+    <text x="710" y="156">6</text>
+  </g>
+  <g fill="#334155" font-size="13" font-weight="600" text-anchor="middle">
+    <text x="90" y="210">Register</text>
+    <text x="214" y="210">Assign</text>
+    <text x="338" y="210">Details</text>
+    <text x="462" y="210">Review</text>
+    <text x="586" y="210">Finalize</text>
+    <text x="710" y="210">Close</text>
+  </g>
+  <g fill="#94a3b8" font-size="10.5" text-anchor="middle">
+    <text x="90" y="230">Intake &amp; number</text>
+    <text x="214" y="230">Officer &amp; due date</text>
+    <text x="338" y="230">Legal analysis</text>
+    <text x="462" y="230">Approve / return</text>
+    <text x="586" y="230">Deliverable</text>
+    <text x="710" y="230">Archive</text>
+  </g>
+</svg>

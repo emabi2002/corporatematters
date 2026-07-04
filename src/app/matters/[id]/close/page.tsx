@@ -27,6 +27,8 @@ import {
   MATTER_STATUS,
   ACTION_TYPES,
 } from '@/lib/workflow-constants';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
+import { HelpButton } from '@/components/help/HelpButton';
 import Link from 'next/link';
 
 type Matter = Database['public']['Tables']['corporate_matters']['Row'];
@@ -230,6 +232,7 @@ export default function CloseMatterPage() {
             <h1 className="text-3xl font-bold text-emerald-900">Close Matter</h1>
             <p className="text-emerald-700 mt-1">{matter.matter_number}</p>
           </div>
+          <HelpButton variant="inline" articleId="matter-closure" label="Help" />
         </div>
 
         {/* Matter Summary */}
@@ -254,7 +257,7 @@ export default function CloseMatterPage() {
         </Card>
 
         {/* Closure Checklist */}
-        <Card>
+        <Card data-tour="closure-checks">
           <CardHeader>
             <CardTitle>Closure Checklist</CardTitle>
             <CardDescription>Verify all requirements before closing</CardDescription>
@@ -344,8 +347,11 @@ export default function CloseMatterPage() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="closure_notes">Closure Notes</Label>
+            <div className="space-y-2" data-tour="closure-summary">
+              <Label htmlFor="closure_notes" className="flex items-center gap-1.5">
+                Closure Notes
+                <HelpTooltip content="Summarise the outcome and the deliverable provided, so a future reader understands the matter without opening every tab." />
+              </Label>
               <Textarea
                 id="closure_notes"
                 value={formData.closure_notes}
@@ -406,6 +412,7 @@ export default function CloseMatterPage() {
               <Button
                 onClick={handleCloseMatter}
                 disabled={submitting || !formData.final_output_verified}
+                data-tour="closure-submit"
                 className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
               >
                 <Lock className="h-4 w-4" />

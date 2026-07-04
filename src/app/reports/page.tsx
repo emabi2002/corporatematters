@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { createClient } from '@/lib/supabase';
+import { HelpButton } from '@/components/help/HelpButton';
 import { format, subDays, subMonths, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays, eachMonthOfInterval } from 'date-fns';
 import {
   BarChart3,
@@ -497,7 +498,7 @@ export default function ReportsPage() {
             <h1 className="text-2xl font-bold text-slate-900">Reports &amp; Analytics</h1>
             <p className="text-sm text-slate-500">Comprehensive insights and performance metrics</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2" data-tour="reports-period">
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4 text-slate-500" />
               <Select value={selectedRange} onValueChange={setSelectedRange}>
@@ -528,11 +529,12 @@ export default function ReportsPage() {
               <Printer className="h-4 w-4 mr-1.5" />
               Print
             </Button>
+            <HelpButton variant="inline" articleId="reports" label="Help" />
           </div>
         </div>
 
         {/* Metric tiles (Overview-style) */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div data-tour="reports-metrics" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {metricTiles.map((m) => {
             const Icon = m.icon;
             return (
@@ -560,7 +562,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Charts */}
-        <div id="charts-container" className="space-y-4">
+        <div id="charts-container" data-tour="reports-charts" className="space-y-4">
           {/* Monthly Trend (full width) */}
           {monthlyTrendData.length > 1 && (
             <Card className="border-slate-200">

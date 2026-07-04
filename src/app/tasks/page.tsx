@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpButton } from '@/components/help/HelpButton';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -331,10 +333,13 @@ export default function TasksPage() {
               Work items across all matters · {filtered.length} shown
             </p>
           </div>
-          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0" onClick={openCreate}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Task
-          </Button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <HelpButton variant="inline" articleId="tasks" label="Help" />
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={openCreate} data-tour="tasks-new">
+              <Plus className="h-4 w-4 mr-2" />
+              New Task
+            </Button>
+          </div>
         </div>
 
         {/* Summary tiles */}
@@ -360,7 +365,7 @@ export default function TasksPage() {
         </div>
 
         {/* Search + pills */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2" data-tour="tasks-filters">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
@@ -406,7 +411,7 @@ export default function TasksPage() {
         </div>
 
         {/* List */}
-        <Card className="border-slate-200">
+        <Card className="border-slate-200" data-tour="tasks-table">
           <CardContent className="p-2">
             {loading ? (
               <div className="flex items-center justify-center py-12">
@@ -606,7 +611,10 @@ export default function TasksPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Priority</Label>
+                <Label className="flex items-center gap-1.5">
+                  Priority
+                  <HelpTooltip id="task-priority" />
+                </Label>
                 <Select
                   value={form.priority}
                   onValueChange={(v) => setForm((f) => ({ ...f, priority: v }))}
@@ -625,7 +633,10 @@ export default function TasksPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Status</Label>
+                <Label className="flex items-center gap-1.5">
+                  Status
+                  <HelpTooltip id="task-status" />
+                </Label>
                 <Select
                   value={form.status}
                   onValueChange={(v) => setForm((f) => ({ ...f, status: v }))}

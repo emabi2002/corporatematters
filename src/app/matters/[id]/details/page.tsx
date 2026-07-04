@@ -26,6 +26,8 @@ import {
   ACTION_TYPES,
 } from '@/lib/workflow-constants';
 import { RISK_CLASSIFICATIONS } from '@/lib/constants';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
+import { HelpButton } from '@/components/help/HelpButton';
 import Link from 'next/link';
 
 type Matter = Database['public']['Tables']['corporate_matters']['Row'];
@@ -234,6 +236,7 @@ export default function MatterDetailsCompletionPage() {
             <h1 className="text-3xl font-bold text-emerald-900">Complete Matter Details</h1>
             <p className="text-emerald-700 mt-1">{matter.matter_number} - {matter.subject || matter.type_of_matter}</p>
           </div>
+          <HelpButton variant="inline" articleId="matter-details" label="Help" />
         </div>
 
         {/* File References Section */}
@@ -245,7 +248,10 @@ export default function MatterDetailsCompletionPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="file_reference">Main File Reference</Label>
+                <Label htmlFor="file_reference" className="flex items-center gap-1.5">
+                  Main File Reference
+                  <HelpTooltip content="Primary DLPP file reference for this matter. Use your office numbering convention (e.g. DLPP/CMS/2024/001)." />
+                </Label>
                 <Input
                   id="file_reference"
                   value={formData.file_reference}
@@ -329,7 +335,10 @@ export default function MatterDetailsCompletionPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="legal_issues">Legal Issues</Label>
+              <Label htmlFor="legal_issues" className="flex items-center gap-1.5">
+                Legal Issues
+                <HelpTooltip content="Set out each legal issue the matter raises, clearly and separately. Stating each as a question (‘Whether…’) helps keep the analysis focused." />
+              </Label>
               <Textarea
                 id="legal_issues"
                 value={formData.legal_issues}
@@ -351,7 +360,10 @@ export default function MatterDetailsCompletionPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="applicable_law">Applicable Law</Label>
+              <Label htmlFor="applicable_law" className="flex items-center gap-1.5">
+                Applicable Law
+                <HelpTooltip content="Cite the legislation, regulations, case law or legal principles that govern the issues. Precise section numbers and citations help reviewers." />
+              </Label>
               <Textarea
                 id="applicable_law"
                 value={formData.applicable_law}
@@ -393,12 +405,15 @@ export default function MatterDetailsCompletionPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="risk_classification">Risk Classification</Label>
+              <Label htmlFor="risk_classification" className="flex items-center gap-1.5">
+                Risk Classification
+                <HelpTooltip id="risk-classification" />
+              </Label>
               <Select
                 value={formData.risk_classification}
                 onValueChange={(value) => updateField('risk_classification', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger id="risk_classification">
                   <SelectValue placeholder="Select risk level" />
                 </SelectTrigger>
                 <SelectContent>

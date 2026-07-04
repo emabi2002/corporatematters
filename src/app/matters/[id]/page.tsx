@@ -183,7 +183,7 @@ export default function MatterDetailsPage() {
     <AppLayout>
       <div className="max-w-[1600px] mx-auto space-y-4">
         {/* Compact header strip */}
-        <Card className="border-slate-200">
+        <Card className="border-slate-200" data-tour="matter-header">
           <CardContent className="p-3">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -257,7 +257,7 @@ export default function MatterDetailsPage() {
 
         {/* 10-Tab Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 h-auto p-1 gap-0.5">
+          <TabsList data-tour="matter-tabs" className="grid w-full grid-cols-5 lg:grid-cols-10 h-auto p-1 gap-0.5">
             <TabsTrigger value="overview" className="text-[11px] lg:text-xs py-1.5">
               <BarChart3 className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Overview

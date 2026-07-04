@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpButton } from '@/components/help/HelpButton';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -296,10 +298,13 @@ export default function DocumentsPage() {
               Every document across all matters · {filtered.length} shown
             </p>
           </div>
-          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0" onClick={openUpload}>
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Document
-          </Button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <HelpButton variant="inline" articleId="documents" label="Help" />
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={openUpload} data-tour="documents-upload">
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Document
+            </Button>
+          </div>
         </div>
 
         {/* Summary tiles */}
@@ -325,7 +330,7 @@ export default function DocumentsPage() {
         </div>
 
         {/* Search + pills */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2" data-tour="documents-search">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
@@ -391,7 +396,7 @@ export default function DocumentsPage() {
                 )}
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto" data-tour="documents-table">
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
@@ -534,7 +539,10 @@ export default function DocumentsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Document Type</Label>
+                <Label className="flex items-center gap-1.5">
+                  Document Type
+                  <HelpTooltip id="document-type" />
+                </Label>
                 <Select
                   value={form.docType || NONE}
                   onValueChange={(v) => setForm((f) => ({ ...f, docType: v === NONE ? '' : v }))}
@@ -554,7 +562,10 @@ export default function DocumentsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Stage</Label>
+                <Label className="flex items-center gap-1.5">
+                  Stage
+                  <HelpTooltip id="document-category" />
+                </Label>
                 <Select
                   value={form.stage}
                   onValueChange={(v) => setForm((f) => ({ ...f, stage: v as Stage }))}

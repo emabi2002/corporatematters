@@ -17,6 +17,7 @@ import {
 import { usePermissions } from '@/hooks/usePermissions';
 import { createClient } from '@/lib/supabase';
 import { Building2, FileText, Upload, Tag, Plus, Edit, Trash2, ArrowLeft } from 'lucide-react';
+import { HelpButton } from '@/components/help/HelpButton';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -153,6 +154,7 @@ export default function ReferenceDataPage() {
             <h1 className="text-2xl font-bold text-slate-900">Reference Data Management</h1>
             <p className="text-sm text-slate-500">Manage divisions, matter types, and document types</p>
           </div>
+          <HelpButton variant="inline" articleId="reference-data" label="Help" className="ml-auto" />
         </div>
 
         {/* Stats tiles */}
@@ -199,14 +201,14 @@ export default function ReferenceDataPage() {
                     Divisions
                     <span className="text-xs font-normal text-slate-400">{divisions.length}</span>
                   </CardTitle>
-                  <Button onClick={() => handleCreate('division')}>
+                  <Button onClick={() => handleCreate('division')} data-tour="reference-add">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Division
                   </Button>
                 </div>
               </CardHeader>
               <CardContent className="px-4 pb-4 pt-0">
-                <table className="w-full">
+                <table className="w-full" data-tour="reference-list">
                   <thead>
                     <tr className="border-b border-slate-200">
                       <th className="text-left p-2 text-xs font-medium text-slate-500">Name</th>

@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Shield, AlertCircle, UserPlus } from 'lucide-react';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase';
 
@@ -234,6 +235,7 @@ export function AddUserDialog({ open, onOpenChange, onSuccess, groups }: AddUser
             <Label htmlFor="group" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Group Assignment *
+              <HelpTooltip content="Groups grant module-level access (RBAC). Assign the group that matches the user’s role and responsibilities. Follow least-privilege." />
             </Label>
             <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
               <SelectTrigger id="group">

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpButton } from '@/components/help/HelpButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -211,14 +212,18 @@ export default function UsersAdminPage() {
             <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
             <p className="text-sm text-slate-500">Manage user accounts and group assignments</p>
           </div>
-          <Button
-            onClick={() => setCreateUserDialogOpen(true)}
-            size="sm"
-            className="gap-2 bg-emerald-600 hover:bg-emerald-700"
-          >
-            <UserPlus className="h-4 w-4" />
-            Add New User
-          </Button>
+          <div className="flex items-center gap-2">
+            <HelpButton variant="inline" articleId="user-management" label="Help" />
+            <Button
+              onClick={() => setCreateUserDialogOpen(true)}
+              size="sm"
+              data-tour="users-add"
+              className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+            >
+              <UserPlus className="h-4 w-4" />
+              Add New User
+            </Button>
+          </div>
         </div>
 
         {/* Stats tiles */}
@@ -276,7 +281,7 @@ export default function UsersAdminPage() {
                 </div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto" data-tour="users-table">
                 <Table>
                   <TableHeader>
                     <TableRow>

@@ -330,6 +330,7 @@ export function ReviewWorkflowTab({ matterId, matter, onMatterUpdate }: ReviewWo
                           size="sm"
                           onClick={() => handleSubmitForReview(doc.id)}
                           disabled={submitting}
+                          data-tour="review-submit"
                           className="flex items-center gap-2"
                         >
                           <Send className="h-3 w-3" />
@@ -421,7 +422,7 @@ export function ReviewWorkflowTab({ matterId, matter, onMatterUpdate }: ReviewWo
                   </div>
 
                   {docReviews.length > 1 && (
-                    <div className="mt-3 pt-3 border-t border-slate-200">
+                    <div className="mt-3 pt-3 border-t border-slate-200" data-tour="review-history">
                       <p className="text-xs font-medium text-slate-600 mb-2">
                         Review History ({docReviews.length} reviews)
                       </p>
