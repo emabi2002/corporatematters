@@ -268,11 +268,11 @@ export default function MatterDetailsPage() {
               <BarChart3 className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="registration" className="text-[11px] lg:text-xs py-1.5">
+            <TabsTrigger value="registration" data-tour="tab-registration" className="text-[11px] lg:text-xs py-1.5">
               <FileText className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Registration
             </TabsTrigger>
-            <TabsTrigger value="assignment" className="text-[11px] lg:text-xs py-1.5">
+            <TabsTrigger value="assignment" data-tour="tab-assignment" className="text-[11px] lg:text-xs py-1.5">
               <User className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Assignment
             </TabsTrigger>
@@ -284,15 +284,15 @@ export default function MatterDetailsPage() {
               <Scale className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Legal Issues
             </TabsTrigger>
-            <TabsTrigger value="documents" className="text-[11px] lg:text-xs py-1.5">
+            <TabsTrigger value="documents" data-tour="tab-documents" className="text-[11px] lg:text-xs py-1.5">
               <Upload className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Documents
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="text-[11px] lg:text-xs py-1.5">
+            <TabsTrigger value="tasks" data-tour="tab-tasks" className="text-[11px] lg:text-xs py-1.5">
               <CheckCircle2 className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Tasks
             </TabsTrigger>
-            <TabsTrigger value="reviews" className="text-[11px] lg:text-xs py-1.5">
+            <TabsTrigger value="reviews" data-tour="tab-reviews" className="text-[11px] lg:text-xs py-1.5">
               <MessageSquare className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Reviews
             </TabsTrigger>
@@ -503,7 +503,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 2: Registration Details */}
-          <TabsContent value="registration" className="space-y-4">
+          <TabsContent value="registration" data-tour="registration-content" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Registration Information</CardTitle>
@@ -612,7 +612,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 3: Assignment History */}
-          <TabsContent value="assignment" className="space-y-4">
+          <TabsContent value="assignment" data-tour="assignment-content" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -963,7 +963,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 6: Documents */}
-          <TabsContent value="documents">
+          <TabsContent value="documents" data-tour="matter-documents-content">
             <DocumentsTab matterId={matter.id} />
           </TabsContent>
 
@@ -973,7 +973,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 8: Review Notes */}
-          <TabsContent value="reviews" className="space-y-4">
+          <TabsContent value="reviews" data-tour="reviews-content" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

@@ -8,6 +8,18 @@ import { useHelp } from './HelpProvider';
 // react-joyride touches the DOM at import time — load it client-side only.
 const Joyride = dynamic(() => import('react-joyride'), { ssr: false });
 
+/**
+ * Click a tab trigger (by its data-tour value) to switch to it, unless it is
+ * already active. Radix Tabs expose data-state="active" on the active trigger.
+ */
+function activateTabByName(name?: string) {
+  if (!name || typeof document === 'undefined') return;
+  const trigger = document.querySelector<HTMLElement>(`[data-tour="${name}"]`);
+  if (trigger && trigger.getAttribute('data-state') !== 'active') {
+    trigger.click();
+  }
+}
+
 export function GuidedTour() {
   const { activeTour, tourRunning, stopTour } = useHelp();
   const [mounted, setMounted] = useState(false);
@@ -36,17 +48,27 @@ export function GuidedTour() {
     const build = () => {
       if (cancelled) return;
       const built: Step[] = activeTour.steps.map((s) => {
-        const isCenter =
-          s.target === 'center' ||
-          (s.target !== 'body' && !isVisible(document.querySelector(s.target)));
+        let isCenter = s.target === 'center';
+        if (!isCenter && s.target !== 'body') {
+          const visibleNow = isVisible(document.querySelector(s.target));
+          // A step that targets content inside a tab is kept (not centered) as
+          // long as the tab trigger exists — we'll activate the tab for it.
+          const canActivate =
+            !!s.activateTab &&
+            !!document.querySelector(`[data-tour="${s.activateTab}"]`);
+          isCenter = !visibleNow && !canActivate;
+        }
         return {
           target: isCenter ? 'body' : s.target,
           title: s.title,
           content: s.content,
           placement: isCenter ? 'center' : s.placement ?? 'auto',
           disableBeacon: s.disableBeacon ?? true,
+          data: { activateTab: s.activateTab },
         } as Step;
       });
+      // Open the first step's tab up-front so it is ready immediately.
+      activateTabByName(activeTour.steps[0]?.activateTab);
       setSteps(built);
       setRun(true);
     };
@@ -60,7 +82,19 @@ export function GuidedTour() {
   }, [tourRunning, activeTour]);
 
   const handleCallback = (data: CallBackProps) => {
-    const { status, action, type } = data;
+    const { status, action, type, index } = data;
+
+    // Auto-switch tabs so content steps always highlight. Pre-activate the tab
+    // for the step we're moving INTO on step:after (gives its content time to
+    // mount), and re-assert it on step:before as a safety net.
+    if (type === 'step:after') {
+      const nextIndex = action === 'prev' ? index - 1 : index + 1;
+      activateTabByName(activeTour?.steps[nextIndex]?.activateTab);
+    } else if (type === 'step:before') {
+      const activateTab = (data.step?.data as { activateTab?: string } | undefined)?.activateTab;
+      activateTabByName(activateTab);
+    }
+
     if (status === 'finished' || status === 'skipped') {
       setRun(false);
       stopTour();

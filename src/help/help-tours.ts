@@ -115,10 +115,14 @@ export const HELP_TOURS: HelpTour[] = [
     route: '/matters/[id]',
     articleId: 'matter-details',
     steps: [
-      { target: 'center', title: 'The Matter Workspace', content: 'Everything about a matter lives here across a set of tabs. Let’s orient you.', placement: 'center', disableBeacon: true },
-      { target: '[data-tour="matter-header"]', title: 'Header Strip', content: 'Matter number, subject, priority, stage, officer and due date at a glance.', placement: 'bottom' },
-      { target: '[data-tour="matter-tabs"]', title: 'Workspace Tabs', content: 'Move across Details, Land/Lease, Legal Issues, Stakeholders, Documents, Tasks, Review, Timeline, Audit and Closure.', placement: 'bottom' },
-      { target: 'center', title: 'Complete Details', content: 'Use “Complete Details” to record file references, legal analysis and risk, then advance the stage to “Details Completed”.', placement: 'center' },
+      { target: 'center', title: 'The Matter Workspace', content: 'Everything about a matter lives here across a set of tabs. This tour switches tabs for you as it goes.', placement: 'center', disableBeacon: true },
+      { target: '[data-tour="matter-header"]', title: 'Header Strip', content: 'Matter number, subject, priority, workflow stage, officer and due date at a glance.', placement: 'bottom' },
+      { target: '[data-tour="matter-tabs"]', title: 'Workspace Tabs', content: 'Ten tabs cover the whole matter. We’ll open a few of the key ones now.', placement: 'bottom' },
+      { target: '[data-tour="registration-content"]', title: 'Registration', content: 'The Registration tab holds the intake details — matter type, requester, requesting division and key dates.', placement: 'top', activateTab: 'tab-registration' },
+      { target: '[data-tour="assignment-content"]', title: 'Assignment', content: 'The Assignment tab shows the responsible officer, the manager’s instructions and the due date.', placement: 'top', activateTab: 'tab-assignment' },
+      { target: '[data-tour="matter-documents-content"]', title: 'Documents', content: 'The Documents tab lists every file attached to this matter, by type and stage.', placement: 'top', activateTab: 'tab-documents' },
+      { target: '[data-tour="reviews-content"]', title: 'Reviews', content: 'The Reviews tab drives the draft review workflow — submit, approve, return and track revisions.', placement: 'top', activateTab: 'tab-reviews' },
+      { target: 'center', title: 'Complete Details', content: 'Use “Edit Details / Complete Details” to record file references, legal analysis and risk, then advance the stage to “Details Completed”.', placement: 'center' },
     ],
   },
 
@@ -132,7 +136,7 @@ export const HELP_TOURS: HelpTour[] = [
     steps: [
       { target: 'center', title: 'Land & Lease Details', content: 'Capture the property particulars that many DLPP matters rely on.', placement: 'center', disableBeacon: true },
       { target: '[data-tour="tab-land"]', title: 'Open the Land/Lease tab', content: 'Select this tab in the matter workspace to view the land and lease information.', placement: 'bottom' },
-      { target: '[data-tour="land-content"]', title: 'Land & Lease Information', content: 'Here you will find the main, title, survey and purchase references, ILG details and property location. Use “Edit Details” to record them.', placement: 'top' },
+      { target: '[data-tour="land-content"]', title: 'Land & Lease Information', content: 'Here you will find the main, title, survey and purchase references, ILG details and property location. Use “Edit Details” to record them.', placement: 'top', activateTab: 'tab-land' },
       { target: 'center', title: 'Attach Documentation', content: 'Upload titles and survey plans under the Documents tab and reference them here.', placement: 'center' },
     ],
   },
@@ -147,7 +151,7 @@ export const HELP_TOURS: HelpTour[] = [
     steps: [
       { target: 'center', title: 'Recording Legal Issues', content: 'Capture a structured legal analysis of the matter.', placement: 'center', disableBeacon: true },
       { target: '[data-tour="tab-legal"]', title: 'Open the Legal Issues tab', content: 'Select this tab to view the legal analysis — issues, claims, applicable law and risk.', placement: 'bottom' },
-      { target: '[data-tour="legal-content"]', title: 'Legal Analysis', content: 'Legal issues, claims & allegations, applicable law and stakeholders appear here. Use “Edit Details” to record them; state each issue as a question and cite legislation precisely.', placement: 'top' },
+      { target: '[data-tour="legal-content"]', title: 'Legal Analysis', content: 'Legal issues, claims & allegations, applicable law and stakeholders appear here. Use “Edit Details” to record them; state each issue as a question and cite legislation precisely.', placement: 'top', activateTab: 'tab-legal' },
       { target: 'center', title: 'Risk Classification', content: 'Set the risk level when editing — it feeds management reporting.', placement: 'center' },
     ],
   },
@@ -162,7 +166,7 @@ export const HELP_TOURS: HelpTour[] = [
     steps: [
       { target: 'center', title: 'Managing Stakeholders', content: 'Record every party connected to the matter and their role.', placement: 'center', disableBeacon: true },
       { target: '[data-tour="tab-legal"]', title: 'Open the Legal Issues tab', content: 'Stakeholders are captured alongside the legal analysis — open this tab.', placement: 'bottom' },
-      { target: '[data-tour="stakeholders-section"]', title: 'Relevant Stakeholders', content: 'Agencies, organisations, landowners and individuals — with contacts and roles — are listed here. Use official names and keep contacts current.', placement: 'top' },
+      { target: '[data-tour="stakeholders-section"]', title: 'Relevant Stakeholders', content: 'Agencies, organisations, landowners and individuals — with contacts and roles — are listed here. Use official names and keep contacts current.', placement: 'top', activateTab: 'tab-legal' },
       { target: 'center', title: 'Keep It Current', content: 'Accurate parties support correct correspondence and conflict checks.', placement: 'center' },
     ],
   },
@@ -206,9 +210,9 @@ export const HELP_TOURS: HelpTour[] = [
     articleId: 'draft-review',
     steps: [
       { target: 'center', title: 'Draft Review Workflow', content: 'Move a draft from officer to reviewer for approval — or return it for revision.', placement: 'center', disableBeacon: true },
-      { target: '[data-tour="review-submit"]', title: 'Submit for Review', content: 'Sends the draft to the reviewer; the stage becomes “Pending Review”.', placement: 'bottom' },
-      { target: '[data-tour="review-history"]', title: 'Revision History', content: 'Every submission and decision is recorded here for audit.', placement: 'top' },
-      { target: 'center', title: 'Approve or Return', content: 'Reviewers approve (→ “Approved for Finalization”) or return with comments (→ “Returned for Revision”).', placement: 'center' },
+      { target: '[data-tour="tab-reviews"]', title: 'Open the Reviews tab', content: 'The review workflow for this matter lives in the Reviews tab.', placement: 'bottom' },
+      { target: '[data-tour="reviews-content"]', title: 'Submit, Approve & Track', content: 'Submit a draft for review, see the reviewer’s decision, and follow the full revision history here. Submitting sets the stage to “Pending Review”; approval moves it to “Approved for Finalization”.', placement: 'top', activateTab: 'tab-reviews' },
+      { target: 'center', title: 'Approve or Return', content: 'Reviewers approve, or return with comments so the officer can revise and resubmit.', placement: 'center' },
     ],
   },
 
@@ -310,7 +314,7 @@ export const HELP_TOURS: HelpTour[] = [
     steps: [
       { target: 'center', title: 'Activity Timeline', content: 'A chronological narrative of everything that happened on a matter.', placement: 'center', disableBeacon: true },
       { target: '[data-tour="tab-timeline"]', title: 'Open the Timeline tab', content: 'Select the Timeline tab in the matter workspace.', placement: 'bottom' },
-      { target: '[data-tour="timeline-content"]', title: 'Chronological Events', content: 'Each entry shows the actor, the action and the time — creation, assignment, submissions, approvals and closure. Ideal for handovers.', placement: 'top' },
+      { target: '[data-tour="timeline-content"]', title: 'Chronological Events', content: 'Each entry shows the actor, the action and the time — creation, assignment, submissions, approvals and closure. Ideal for handovers.', placement: 'top', activateTab: 'tab-timeline' },
     ],
   },
 
@@ -324,7 +328,7 @@ export const HELP_TOURS: HelpTour[] = [
     steps: [
       { target: 'center', title: 'Audit Trail', content: 'The definitive record of who changed what, when — and the old and new values.', placement: 'center', disableBeacon: true },
       { target: '[data-tour="tab-audit"]', title: 'Open the Audit Trail tab', content: 'Select the Audit Trail tab in the matter workspace.', placement: 'bottom' },
-      { target: '[data-tour="audit-content"]', title: 'Field-level Changes', content: 'Every entry records the user, date/time, the field changed and its previous and new values. It is generated automatically and cannot be edited.', placement: 'top' },
+      { target: '[data-tour="audit-content"]', title: 'Field-level Changes', content: 'Every entry records the user, date/time, the field changed and its previous and new values. It is generated automatically and cannot be edited.', placement: 'top', activateTab: 'tab-audit' },
     ],
   },
 ];

@@ -85,3 +85,20 @@
 - [x] Added spec example tooltips on real controls: Matter Number & Workflow Stage (matter header),
       Submit for Review (review tab), Close Matter (closure page)
 - [x] tsc 0 errors; all routes 200; drawer/button/tour mount confirmed
+
+## Round 4 — tab auto-switch + remaining tab anchors
+- [x] Added HelpTourStep.activateTab: a tour step can name a tab trigger to open before it runs
+- [x] GuidedTour auto-switches tabs: pre-activates first step's tab, activates the next
+      step's tab on step:after (content mounts in time) and re-asserts on step:before;
+      build keeps content targets (not centered) when their tab trigger exists
+- [x] Added anchors to remaining matter-detail tabs: tab-registration, tab-assignment,
+      tab-documents, tab-tasks, tab-reviews (+ content: registration-content,
+      assignment-content, matter-documents-content, reviews-content)
+- [x] Retargeted tours to real tab elements with activateTab:
+      land->tab-land, legal->tab-legal, stakeholders->tab-legal, timeline->tab-timeline,
+      audit->tab-audit, draft-review->tab-reviews (reviews-content)
+- [x] Matter Details tour now walks Registration -> Assignment -> Documents -> Reviews,
+      auto-switching tabs as it goes (demonstrates the feature)
+- [x] Verified: every tour selector + every activateTab trigger maps to a real anchor;
+      tsc 0 errors; all routes 200
+- [x] Pushed round 3 to GitHub (f63f108)

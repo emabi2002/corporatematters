@@ -143,6 +143,12 @@ export interface HelpTourStep {
     | 'bottom-start';
   /** Disable the beacon and start immediately. */
   disableBeacon?: boolean;
+  /**
+   * data-tour value of a tab trigger to activate before this step runs, so a
+   * step targeting content inside an inactive tab always highlights. The
+   * GuidedTour clicks the matching [data-tour="..."] trigger.
+   */
+  activateTab?: string;
 }
 
 /** A complete guided walkthrough. */
