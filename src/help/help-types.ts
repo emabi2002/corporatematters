@@ -126,7 +126,7 @@ export interface HelpCategory {
   accent: string;
 }
 
-/** A single guided-tour step (maps onto react-joyride Step). */
+/** A single guided-tour step (rendered by driver.js). */
 export interface HelpTourStep {
   /** CSS selector, or "center" for a modal-style step. */
   target: string;

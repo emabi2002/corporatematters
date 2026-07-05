@@ -1,17 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
-import type { CallBackProps, Step } from 'react-joyride';
+import { useEffect } from 'react';
 import { useHelp } from './HelpProvider';
+import type { HelpTourStep } from '@/help/help-types';
+import 'driver.js/dist/driver.css';
 
-// react-joyride touches the DOM at import time — load it client-side only.
-const Joyride = dynamic(() => import('react-joyride'), { ssr: false });
-
-/**
- * Click a tab trigger (by its data-tour value) to switch to it, unless it is
- * already active. Radix Tabs expose data-state="active" on the active trigger.
- */
+/** Click a tab trigger (by its data-tour value) to switch to it, if not active. */
 function activateTabByName(name?: string) {
   if (!name || typeof document === 'undefined') return;
   const trigger = document.querySelector<HTMLElement>(`[data-tour="${name}"]`);
@@ -20,134 +14,148 @@ function activateTabByName(name?: string) {
   }
 }
 
+function isTabActive(name?: string) {
+  if (!name || typeof document === 'undefined') return true;
+  const trigger = document.querySelector<HTMLElement>(`[data-tour="${name}"]`);
+  return !trigger || trigger.getAttribute('data-state') === 'active';
+}
+
+function isVisible(el: Element | null): boolean {
+  if (!el) return false;
+  const rect = el.getBoundingClientRect();
+  if (rect.width === 0 && rect.height === 0) return false;
+  const style = window.getComputedStyle(el);
+  return style.visibility !== 'hidden' && style.display !== 'none';
+}
+
+type Side = 'top' | 'bottom' | 'left' | 'right';
+function mapSide(placement?: HelpTourStep['placement']): Side {
+  switch (placement) {
+    case 'top':
+    case 'top-start':
+      return 'top';
+    case 'left':
+      return 'left';
+    case 'right':
+      return 'right';
+    case 'bottom':
+    case 'bottom-start':
+      return 'bottom';
+    default:
+      return 'bottom';
+  }
+}
+
+/**
+ * Guided tours, powered by driver.js (React 18 / Next 15 native). Reads the
+ * active tour from the Help context, resiliently centers steps whose target is
+ * missing, and auto-switches matter tabs so content steps always highlight.
+ */
 export function GuidedTour() {
   const { activeTour, tourRunning, stopTour } = useHelp();
-  const [mounted, setMounted] = useState(false);
-  const [steps, setSteps] = useState<Step[]>([]);
-  const [run, setRun] = useState(false);
 
-  useEffect(() => setMounted(true), []);
-
-  // Build (and sanitise) steps whenever a tour starts. Any target that is not
-  // present in the DOM is converted into a centered, modal-style step so the
-  // tour always runs and every explanation is still shown.
   useEffect(() => {
-    if (!tourRunning || !activeTour) {
-      setRun(false);
-      return;
-    }
+    if (!tourRunning || !activeTour) return;
 
     let cancelled = false;
-    const isVisible = (el: Element | null): boolean => {
-      if (!el) return false;
-      const rect = el.getBoundingClientRect();
-      if (rect.width === 0 && rect.height === 0) return false;
-      const style = window.getComputedStyle(el);
-      return style.visibility !== 'hidden' && style.display !== 'none';
-    };
-    const build = () => {
+    let active = false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let driverObj: any = null;
+    let startTimer: ReturnType<typeof setTimeout> | undefined;
+
+    (async () => {
+      const { driver } = await import('driver.js');
       if (cancelled) return;
-      const built: Step[] = activeTour.steps.map((s) => {
-        let isCenter = s.target === 'center';
-        if (!isCenter && s.target !== 'body') {
-          const visibleNow = isVisible(document.querySelector(s.target));
-          // A step that targets content inside a tab is kept (not centered) as
-          // long as the tab trigger exists — we'll activate the tab for it.
+
+      const sourceSteps = activeTour.steps;
+
+      // Build driver steps; center any step whose target is missing and whose
+      // tab cannot be opened.
+      const steps = sourceSteps.map((s) => {
+        let element: string | undefined;
+        if (s.target !== 'center' && s.target !== 'body') {
           const canActivate =
             !!s.activateTab &&
             !!document.querySelector(`[data-tour="${s.activateTab}"]`);
-          isCenter = !visibleNow && !canActivate;
+          if (isVisible(document.querySelector(s.target)) || canActivate) {
+            element = s.target;
+          }
         }
         return {
-          target: isCenter ? 'body' : s.target,
-          title: s.title,
-          content: s.content,
-          placement: isCenter ? 'center' : s.placement ?? 'auto',
-          disableBeacon: s.disableBeacon ?? true,
-          data: { activateTab: s.activateTab },
-        } as Step;
+          element,
+          popover: {
+            title: s.title,
+            description: s.content,
+            side: mapSide(s.placement),
+            align: 'start' as const,
+          },
+        };
       });
-      // Open the first step's tab up-front so it is ready immediately.
-      activateTabByName(activeTour.steps[0]?.activateTab);
-      setSteps(built);
-      setRun(true);
-    };
 
-    // Allow any route navigation / render to settle before measuring targets.
-    const t = setTimeout(build, 450);
+      driverObj = driver({
+        showProgress: true,
+        progressText: 'Step {{current}} of {{total}}',
+        allowClose: true,
+        overlayColor: 'rgba(15, 23, 42, 0.55)',
+        stagePadding: 6,
+        stageRadius: 10,
+        popoverClass: 'dlpp-help-tour',
+        nextBtnText: 'Next',
+        prevBtnText: 'Back',
+        doneBtnText: 'Finish',
+        steps,
+        onHighlightStarted: () => {
+          const idx = driverObj?.getActiveIndex?.() ?? 0;
+          activateTabByName(sourceSteps[idx]?.activateTab);
+        },
+        onNextClick: () => {
+          const idx = driverObj?.getActiveIndex?.() ?? 0;
+          const nextTab = sourceSteps[idx + 1]?.activateTab;
+          if (nextTab && !isTabActive(nextTab)) {
+            activateTabByName(nextTab);
+            setTimeout(() => driverObj?.moveNext(), 220);
+          } else {
+            driverObj?.moveNext();
+          }
+        },
+        onPrevClick: () => {
+          const idx = driverObj?.getActiveIndex?.() ?? 0;
+          const prevTab = sourceSteps[idx - 1]?.activateTab;
+          if (prevTab && !isTabActive(prevTab)) {
+            activateTabByName(prevTab);
+            setTimeout(() => driverObj?.movePrevious(), 220);
+          } else {
+            driverObj?.movePrevious();
+          }
+        },
+        onDestroyed: () => {
+          active = false;
+          if (!cancelled) stopTour();
+        },
+      });
+
+      // Open the first step's tab up-front, then start after render settles.
+      activateTabByName(sourceSteps[0]?.activateTab);
+      startTimer = setTimeout(() => {
+        if (cancelled) return;
+        active = true;
+        driverObj.drive();
+      }, 450);
+    })();
+
     return () => {
       cancelled = true;
-      clearTimeout(t);
+      if (startTimer) clearTimeout(startTimer);
+      if (active && driverObj) {
+        active = false;
+        try {
+          driverObj.destroy();
+        } catch {
+          /* ignore */
+        }
+      }
     };
-  }, [tourRunning, activeTour]);
+  }, [tourRunning, activeTour, stopTour]);
 
-  const handleCallback = (data: CallBackProps) => {
-    const { status, action, type, index } = data;
-
-    // Auto-switch tabs so content steps always highlight. Pre-activate the tab
-    // for the step we're moving INTO on step:after (gives its content time to
-    // mount), and re-assert it on step:before as a safety net.
-    if (type === 'step:after') {
-      const nextIndex = action === 'prev' ? index - 1 : index + 1;
-      activateTabByName(activeTour?.steps[nextIndex]?.activateTab);
-    } else if (type === 'step:before') {
-      const activateTab = (data.step?.data as { activateTab?: string } | undefined)?.activateTab;
-      activateTabByName(activateTab);
-    }
-
-    if (status === 'finished' || status === 'skipped') {
-      setRun(false);
-      stopTour();
-    } else if (action === 'close' && type === 'step:after') {
-      setRun(false);
-      stopTour();
-    }
-  };
-
-  if (!mounted || steps.length === 0) return null;
-
-  return (
-    <Joyride
-      steps={steps}
-      run={run}
-      continuous
-      showProgress
-      showSkipButton
-      scrollToFirstStep
-      disableScrollParentFix
-      spotlightPadding={6}
-      callback={handleCallback}
-      locale={{ last: 'Finish', skip: 'Skip tour', next: 'Next', back: 'Back' }}
-      styles={{
-        options: {
-          primaryColor: '#059669',
-          zIndex: 10000,
-          arrowColor: '#ffffff',
-          backgroundColor: '#ffffff',
-          textColor: '#334155',
-          overlayColor: 'rgba(15, 23, 42, 0.55)',
-          width: 380,
-        },
-        tooltip: { borderRadius: 14, padding: 18 },
-        tooltipTitle: {
-          fontSize: 15,
-          fontWeight: 700,
-          color: '#0f172a',
-          marginBottom: 6,
-        },
-        tooltipContent: { fontSize: 13.5, lineHeight: 1.55, padding: '4px 0' },
-        buttonNext: {
-          backgroundColor: '#059669',
-          borderRadius: 8,
-          fontSize: 13,
-          fontWeight: 600,
-          padding: '8px 14px',
-          outline: 'none',
-        },
-        buttonBack: { color: '#64748b', fontSize: 13, marginRight: 8 },
-        buttonSkip: { color: '#94a3b8', fontSize: 13 },
-        spotlight: { borderRadius: 10 },
-      }}
-    />
-  );
+  return null;
 }
