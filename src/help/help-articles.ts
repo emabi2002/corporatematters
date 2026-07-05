@@ -188,7 +188,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     icon: 'FilePlus',
     summary: 'Complete the four-step wizard to record a new corporate legal request.',
     audiences: ['registry', 'manager', 'admin'],
-    routes: ['/matters/new'],
+    routes: ['/matters/new', '/matters/register'],
     tourId: 'register-new-matter',
     media: [
       { type: 'image', src: '/help/workflow.svg', caption: 'Registration is step 1 of the corporate matter lifecycle.' },
@@ -637,7 +637,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     icon: 'FileCog',
     summary: 'Submit drafts, review, return for revision, approve and track revisions.',
     audiences: ['officer', 'reviewer', 'manager', 'director'],
-    routes: ['/matters/[id]', '/matters/[id]/review'],
+    routes: ['/matters/[id]/review'],
     tourId: 'draft-review',
     media: [
       { type: 'image', src: '/help/workflow.svg', caption: 'Draft review sits between details completion and finalization.' },
@@ -842,6 +842,53 @@ export const HELP_ARTICLES: HelpArticle[] = [
   },
 
   // --------------------------------------------------------------------------
+  // ADMIN PANEL (home)
+  // --------------------------------------------------------------------------
+  {
+    id: 'admin',
+    title: 'Administration Panel',
+    category: 'admin',
+    icon: 'Settings',
+    summary: 'The control centre for users, permissions, divisions and reference data.',
+    audiences: ['admin', 'manager'],
+    routes: ['/admin'],
+    tourId: 'admin',
+    estMinutes: 3,
+    purpose:
+      'The Admin Panel is the single entry point to configure the system — user accounts, permission groups, divisions and the reference-data lists that power every form.',
+    whoShouldUse:
+      'System Administrators, and Managers with the relevant permissions. Day-to-day users will not see these tools.',
+    businessPurpose:
+      'Centralised administration keeps access secure, data consistent and the system aligned with how the Legal Services division actually works.',
+    steps: [
+      { title: 'Open Administration', detail: 'Use the Administration group in the sidebar to reach each admin tool.' },
+      { title: 'Manage users', detail: 'Create accounts, set roles and add users to permission groups under User Management.' },
+      { title: 'Manage permissions', detail: 'Use Groups & Permissions to control module-level access (RBAC).' },
+      { title: 'Maintain reference data', detail: 'Keep divisions, matter types and document types current so dropdowns stay clean.' },
+    ],
+    requiredFields: [],
+    validationRules: [
+      'Admin tools are permission-gated — only authorised roles can change them.',
+      'Changes here affect all users, so apply them deliberately.',
+    ],
+    tips: [
+      'Follow least-privilege: grant only the access each role needs.',
+      'Deactivate departing users rather than deleting them, to preserve history.',
+    ],
+    commonMistakes: [
+      'Granting broad admin access when a narrower group would do.',
+      'Creating duplicate reference values with slightly different spellings.',
+    ],
+    faqs: [
+      { q: 'Who can access the Admin Panel?', a: 'System Administrators, and roles explicitly granted admin module permissions.' },
+      { q: 'Where do I change what a role can see?', a: 'Groups & Permissions controls module-level read/write access for each group.' },
+    ],
+    relatedIds: ['user-management', 'reference-data', 'audit-trail'],
+    nextSteps: ['Open User Management to add or edit a user.', 'Review Reference Data for outdated values.'],
+    keywords: ['admin', 'administration', 'panel', 'settings', 'configuration', 'users', 'permissions', 'reference data'],
+  },
+
+  // --------------------------------------------------------------------------
   // USER MANAGEMENT
   // --------------------------------------------------------------------------
   {
@@ -851,7 +898,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     icon: 'Users',
     summary: 'Create, edit and deactivate users, reset passwords and assign roles & permissions.',
     audiences: ['admin'],
-    routes: ['/admin/users', '/admin'],
+    routes: ['/admin/users'],
     tourId: 'user-management',
     estMinutes: 6,
     hasScreenshot: true,

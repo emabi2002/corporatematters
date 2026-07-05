@@ -403,12 +403,13 @@ export default function CloseMatterPage() {
               </div>
             )}
 
-            <div className="flex justify-end gap-4 pt-4 border-t">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t">
               <Link href={`/matters/${params.id}`}>
                 <Button variant="outline" disabled={submitting}>
                   Cancel
                 </Button>
               </Link>
+              <HelpTooltip id="close-matter" />
               <Button
                 onClick={handleCloseMatter}
                 disabled={submitting || !formData.final_output_verified}

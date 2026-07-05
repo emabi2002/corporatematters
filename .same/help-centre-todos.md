@@ -67,3 +67,21 @@
       - Real screenshots/videos now drop in via a URL — no code changes
 - [x] tsc 0 errors; SVG assets serve 200; article media verified rendering
 - [ ] Deploy: commit + push to github.com/emabi2002/corporatematters
+
+## Round 3 — embed like landcasesystem (mount in AppLayout)
+- [x] Moved Help mounting OUT of root ClientBody and INTO the authenticated shell:
+      AppLayout now renders <HelpProvider><HelpButton/><HelpDrawer/><GuidedTour/>
+- [x] ClientBody reverted to AuthProvider only (no Help on login/unauth pages)
+- [x] Cross-route tours preserved despite AppLayout remounting on navigation:
+      startTour hands the tour off via sessionStorage; HelpProvider resumes it on mount
+- [x] Verified floating Help button is ABSENT on /auth/login and PRESENT in the authed shell
+- [x] Route mapping verified end-to-end (script):
+      /dashboard->dashboard, /matters->matter-register, /matters/new & /matters/register->register-new-matter,
+      /matters/[id]->matter-details, /assign->matter-assignment, /details->matter-details,
+      /review->draft-review, /close->matter-closure, /notifications->notifications, /reports->reports,
+      /admin->admin (NEW), /admin/users->user-management, /admin/reference-data->reference-data,
+      /help->help-centre, unknown->help-centre (fallback)
+- [x] Added dedicated Admin Panel article + Admin tour (/admin)
+- [x] Added spec example tooltips on real controls: Matter Number & Workflow Stage (matter header),
+      Submit for Review (review tab), Close Matter (closure page)
+- [x] tsc 0 errors; all routes 200; drawer/button/tour mount confirmed

@@ -48,6 +48,10 @@ const HelpContext = createContext<HelpContextValue | undefined>(undefined);
 const RECENT_KEY = 'corporate_help_recent';
 const FAV_KEY = 'corporate_help_favourites';
 const FEEDBACK_KEY = 'corporate_help_feedback';
+// Lets a tour survive a route change + AppLayout remount (see startTour).
+const PENDING_TOUR_KEY = 'corporate_help_pending_tour';
+// Keeps the drawer open as the user moves between module pages.
+const DRAWER_OPEN_KEY = 'corporate_help_drawer_open';
 const MAX_RECENT = 8;
 
 function readList(key: string): string[] {
@@ -70,6 +74,9 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
   const [recent, setRecent] = useState<string[]>([]);
   const [favourites, setFavourites] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<Feedback>({});
+  // Guards the drawer-open persistence so it never overwrites the restored
+  // value before hydration has run.
+  const [hydrated, setHydrated] = useState(false);
 
   // Hydrate persisted state
   useEffect(() => {
@@ -78,6 +85,39 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
     try {
       const raw = localStorage.getItem(FEEDBACK_KEY);
       if (raw) setFeedback(JSON.parse(raw) as Feedback);
+    } catch {
+      /* ignore */
+    }
+    // Restore the drawer's open state so it stays open across navigation.
+    try {
+      if (sessionStorage.getItem(DRAWER_OPEN_KEY) === 'true') setOpen(true);
+    } catch {
+      /* ignore */
+    }
+    setHydrated(true);
+  }, []);
+
+  // Persist the drawer's open state (after hydration to avoid clobbering it).
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      sessionStorage.setItem(DRAWER_OPEN_KEY, String(open));
+    } catch {
+      /* ignore */
+    }
+  }, [open, hydrated]);
+
+  // Resume a tour that was launched from a different route. Because AppLayout
+  // (and this provider) remount on navigation, a cross-route tour is handed off
+  // via sessionStorage in startTour and picked up here after the new page mounts.
+  useEffect(() => {
+    try {
+      const pending = sessionStorage.getItem(PENDING_TOUR_KEY);
+      if (pending && getTour(pending)) {
+        sessionStorage.removeItem(PENDING_TOUR_KEY);
+        setTourId(pending);
+        setTourRunning(true);
+      }
     } catch {
       /* ignore */
     }
@@ -129,11 +169,20 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
     (id: string) => {
       const tour = getTour(id);
       setOpen(false);
-      setTourId(id);
-      setTourRunning(true);
-      // If the tour targets a different route, navigate there first.
-      if (tour?.route && !tour.route.includes('[') && pathname !== tour.route) {
-        router.push(tour.route);
+      const needsNav =
+        !!tour?.route && !tour.route.includes('[') && pathname !== tour.route;
+      if (needsNav) {
+        // Navigate first; the tour resumes after the destination page mounts.
+        try {
+          sessionStorage.setItem(PENDING_TOUR_KEY, id);
+        } catch {
+          /* ignore */
+        }
+        router.push(tour!.route!);
+      } else {
+        // Same page — start immediately.
+        setTourId(id);
+        setTourRunning(true);
       }
     },
     [pathname, router]

@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopHeader } from '@/components/layout/TopHeader';
+import { HelpProvider } from '@/components/help/HelpProvider';
+import { HelpButton } from '@/components/help/HelpButton';
+import { HelpDrawer } from '@/components/help/HelpDrawer';
+import { GuidedTour } from '@/components/help/GuidedTour';
 import { cn } from '@/lib/utils';
 
 const SIDEBAR_COLLAPSED_KEY = 'corporate_sidebar_collapsed';
@@ -66,34 +70,44 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Collapsible sidebar with mobile drawer */}
-      <Sidebar
-        collapsed={sidebarCollapsed}
-        onToggle={toggleSidebar}
-        mobileOpen={mobileOpen}
-        onMobileClose={closeMobile}
-      />
-
-      {/* Main content area shifts with the sidebar width on desktop */}
-      <div
-        className={cn(
-          'transition-all duration-300',
-          sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
-        )}
-      >
-        {/* Sticky top header */}
-        <TopHeader
-          sidebarCollapsed={sidebarCollapsed}
-          onToggleSidebar={toggleSidebar}
-          onMobileToggle={toggleMobile}
+    // Help facility is mounted inside the authenticated Corporate Matters shell,
+    // so it is available on every module page — floating button, route-aware
+    // drawer and guided tours — without users ever leaving the page.
+    <HelpProvider>
+      <div className="min-h-screen bg-slate-50">
+        {/* Collapsible sidebar with mobile drawer */}
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={toggleSidebar}
+          mobileOpen={mobileOpen}
+          onMobileClose={closeMobile}
         />
 
-        {/* Page content */}
-        <main className="min-h-[calc(100vh-4rem)] p-4 lg:p-6">
-          {children}
-        </main>
+        {/* Main content area shifts with the sidebar width on desktop */}
+        <div
+          className={cn(
+            'transition-all duration-300',
+            sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+          )}
+        >
+          {/* Sticky top header */}
+          <TopHeader
+            sidebarCollapsed={sidebarCollapsed}
+            onToggleSidebar={toggleSidebar}
+            onMobileToggle={toggleMobile}
+          />
+
+          {/* Page content */}
+          <main className="min-h-[calc(100vh-4rem)] p-4 lg:p-6">
+            {children}
+          </main>
+        </div>
+
+        {/* Contextual help — floating button, right-side drawer, guided tours */}
+        <HelpButton />
+        <HelpDrawer />
+        <GuidedTour />
       </div>
-    </div>
+    </HelpProvider>
   );
 }

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { createClient } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 import type { Database } from '@/lib/database.types';
 import { format, isBefore, differenceInDays } from 'date-fns';
 import {
@@ -33,6 +34,8 @@ import {
 } from 'lucide-react';
 import { DocumentsTab } from '@/components/matter-details/DocumentsTab';
 import { TasksTab } from '@/components/matter-details/TasksTab';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
+import { HelpButton } from '@/components/help/HelpButton';
 import Link from 'next/link';
 import {
   getWorkflowStageColor,
@@ -195,8 +198,10 @@ export default function MatterDetailsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h1 className="text-xl font-bold text-slate-900 truncate">{matter.matter_number}</h1>
-                    <Badge variant="outline" className={getWorkflowStageColor(matter.workflow_stage)}>
+                    <HelpTooltip id="matter-number" />
+                    <Badge variant="outline" className={cn('inline-flex items-center gap-1', getWorkflowStageColor(matter.workflow_stage))}>
                       {matter.workflow_stage}
+                      <HelpTooltip id="workflow-stage" iconClassName="text-current opacity-70" />
                     </Badge>
                     <Badge variant="outline" className={getPriorityColor(matter.priority)}>
                       {matter.priority}
@@ -225,7 +230,8 @@ export default function MatterDetailsPage() {
               </div>
 
               {/* Quick Actions */}
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <HelpButton variant="icon" articleId="matter-details" />
                 {!matter.assigned_officer && (
                   <Link href={`/matters/${matter.id}/assign`}>
                     <Button variant="outline" size="sm">
@@ -270,11 +276,11 @@ export default function MatterDetailsPage() {
               <User className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Assignment
             </TabsTrigger>
-            <TabsTrigger value="land" className="text-[11px] lg:text-xs py-1.5">
+            <TabsTrigger value="land" data-tour="tab-land" className="text-[11px] lg:text-xs py-1.5">
               <MapPin className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Land/Lease
             </TabsTrigger>
-            <TabsTrigger value="legal" className="text-[11px] lg:text-xs py-1.5">
+            <TabsTrigger value="legal" data-tour="tab-legal" className="text-[11px] lg:text-xs py-1.5">
               <Scale className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Legal Issues
             </TabsTrigger>
@@ -290,11 +296,11 @@ export default function MatterDetailsPage() {
               <MessageSquare className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Reviews
             </TabsTrigger>
-            <TabsTrigger value="timeline" className="text-[11px] lg:text-xs py-1.5">
+            <TabsTrigger value="timeline" data-tour="tab-timeline" className="text-[11px] lg:text-xs py-1.5">
               <Clock className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Timeline
             </TabsTrigger>
-            <TabsTrigger value="audit" className="text-[11px] lg:text-xs py-1.5">
+            <TabsTrigger value="audit" data-tour="tab-audit" className="text-[11px] lg:text-xs py-1.5">
               <Shield className="h-3.5 w-3.5 mr-1 hidden lg:inline" />
               Audit Trail
             </TabsTrigger>
@@ -731,7 +737,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 4: Land/Lease Details */}
-          <TabsContent value="land" className="space-y-4">
+          <TabsContent value="land" data-tour="land-content" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -863,7 +869,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 5: Legal Issues */}
-          <TabsContent value="legal" className="space-y-4">
+          <TabsContent value="legal" data-tour="legal-content" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -904,7 +910,7 @@ export default function MatterDetailsPage() {
                     {matter.relevant_stakeholders && (
                       <>
                         <Separator />
-                        <div>
+                        <div data-tour="stakeholders-section">
                           <h3 className="font-semibold text-sm text-slate-700 mb-2">Relevant Stakeholders</h3>
                           <p className="text-sm text-slate-900 whitespace-pre-wrap">{matter.relevant_stakeholders}</p>
                         </div>
@@ -1020,7 +1026,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 9: Timeline */}
-          <TabsContent value="timeline" className="space-y-4">
+          <TabsContent value="timeline" data-tour="timeline-content" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1076,7 +1082,7 @@ export default function MatterDetailsPage() {
           </TabsContent>
 
           {/* Tab 10: Audit Trail */}
-          <TabsContent value="audit" className="space-y-4">
+          <TabsContent value="audit" data-tour="audit-content" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
