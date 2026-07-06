@@ -1063,20 +1063,23 @@ export const HELP_ARTICLES: HelpArticle[] = [
       'Accurate accounts and roles are the foundation of security and accountability — every action in the system is tied to a user.',
     steps: [
       'Open “User Management” from the Administration group.',
-      'Click Add User and enter the person’s name, email and role.',
-      'Assign the appropriate groups to grant the right permissions.',
+      'Click Add User and enter the person’s full name and official email.',
+      'Set an initial password and confirm it (at least 8 characters).',
+      'Assign a Group — this grants the module permissions for their role.',
       'Save — the account is created and can sign in.',
-      'Edit or deactivate accounts here as roles change or staff leave.',
+      'Edit or deactivate accounts here as responsibilities change or staff leave.',
     ],
     requiredFields: [
       { name: 'Full Name', required: true, description: 'The user’s name as it should appear in the system.' },
-      { name: 'Email', required: true, description: 'The official DLPP email used to sign in.' },
-      { name: 'Role', required: true, description: 'The corporate role that shapes default access.' },
-      { name: 'Group(s)', required: false, description: 'Permission groups that grant module access.' },
+      { name: 'Email Address', required: true, description: 'The official DLPP email used to sign in.' },
+      { name: 'Password', required: true, description: 'An initial password (min 8 characters); the user should change it after first sign-in.' },
+      { name: 'Group Assignment', required: true, description: 'The permission group that grants module access — this is how access is controlled.' },
+      { name: 'Department', required: false, description: 'Optional department / division label for the user.' },
     ],
     validationRules: [
-      'Email must be unique and valid.',
-      'A role must be selected.',
+      'Email must be unique and valid, and the two password fields must match.',
+      'Password must be at least 8 characters.',
+      'A group must be assigned, otherwise the user can sign in but sees no menus.',
       'Creating and deleting users are privileged, server-side actions and are audited.',
     ],
     bestPractices: [
@@ -1352,13 +1355,15 @@ export const HELP_ARTICLES: HelpArticle[] = [
       'Filter by your role to see the guidance most relevant to you.',
       'Take the welcome tour first if you are new.',
       'Mark articles you use often as favourites for quick access.',
+      'Press ? or F1 on any page to open help for the screen you are on.',
     ],
     commonMistakes: [
       'Searching for the exact screen title only — try a task word like “assign” or “upload”.',
     ],
     faqs: [
-      { question: 'How does contextual help work?', answer: 'The Help button and drawer detect the page you are on and open the matching article automatically.' },
+      { question: 'How does contextual help work?', answer: 'The Help button, the header “?”, and the ? / F1 shortcut all detect the page you are on and open the matching article automatically.' },
       { question: 'Can I print an article?', answer: 'Yes — open the article and use Print or Download to save a clean copy.' },
+      { question: 'Can I get the whole manual?', answer: 'Yes — use “Print user manual” or “Download manual” on the Help Centre to export every article as a single document.' },
     ],
     relatedIds: ['login', 'dashboard', 'matter-register'],
     nextSteps: [

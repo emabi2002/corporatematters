@@ -177,6 +177,29 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
     [favouriteIds],
   );
 
+  // Global shortcut: "?" (Shift+/) or F1 toggles contextual help for the page.
+  // Ignored while typing in a field so it never blocks normal input.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      const tag = el?.tagName;
+      const typing =
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        Boolean(el?.isContentEditable);
+      if (typing) return;
+      const isHelpKey =
+        e.key === 'F1' || (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey);
+      if (!isHelpKey) return;
+      e.preventDefault();
+      if (isOpen) closeHelp();
+      else openHelp();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, openHelp, closeHelp]);
+
   const value = useMemo<HelpContextValue>(
     () => ({
       isOpen,

@@ -16,7 +16,10 @@ import {
   MapPin,
   Route,
   ThumbsUp,
+  Printer,
+  Download,
 } from 'lucide-react';
+import { printManual, downloadManual } from '@/help/help-print';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import {
@@ -128,14 +131,32 @@ export function HelpCentre() {
               className="h-12 rounded-xl border-0 bg-white pl-12 text-base shadow-lg focus-visible:ring-2 focus-visible:ring-amber-400"
             />
           </div>
-          <button
-            type="button"
-            onClick={() => startTour(WELCOME_TOUR_ID)}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white/15 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/25"
-          >
-            <PlayCircle className="h-4 w-4" />
-            Take the welcome tour
-          </button>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => startTour(WELCOME_TOUR_ID)}
+              className="inline-flex items-center gap-2 rounded-lg bg-white/15 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/25"
+            >
+              <PlayCircle className="h-4 w-4" />
+              Take the welcome tour
+            </button>
+            <button
+              type="button"
+              onClick={printManual}
+              className="inline-flex items-center gap-2 rounded-lg bg-white/15 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/25"
+            >
+              <Printer className="h-4 w-4" />
+              Print user manual
+            </button>
+            <button
+              type="button"
+              onClick={downloadManual}
+              className="inline-flex items-center gap-2 rounded-lg bg-white/15 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/25"
+            >
+              <Download className="h-4 w-4" />
+              Download manual
+            </button>
+          </div>
         </div>
       </div>
 
