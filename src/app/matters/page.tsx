@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpLauncher } from '@/components/help/HelpButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -426,12 +427,15 @@ function MattersPageContent() {
               )}
             </p>
           </div>
-          <Link href="/matters/new" data-tour="matters-new">
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0">
-              <Plus className="h-4 w-4 mr-2" />
-              Register New Matter
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <HelpLauncher label="Learn more" />
+            <Link href="/matters/new" data-tour="matters-new">
+              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0">
+                <Plus className="h-4 w-4 mr-2" />
+                Register New Matter
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Quick-filter pills */}

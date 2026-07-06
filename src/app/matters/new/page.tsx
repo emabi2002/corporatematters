@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpLauncher } from '@/components/help/HelpButton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -323,6 +324,7 @@ export default function NewMatterPage() {
             <h1 className="text-3xl font-bold text-emerald-900">Register New Matter</h1>
             <p className="text-emerald-700 mt-1">Multi-step workflow registration process</p>
           </div>
+          <HelpLauncher label="Learn more" />
         </div>
 
         {/* Progress Steps */}

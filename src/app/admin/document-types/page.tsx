@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 import {
   Select,
   SelectContent,
@@ -368,8 +369,12 @@ export default function DocumentTypesPage() {
 
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">
+                <Label htmlFor="name" className="flex items-center gap-1.5">
                   Document Type Name <span className="text-red-500">*</span>
+                  <HelpTooltip
+                    title="Document Type Name"
+                    content="The classification chosen when uploading a document. A short, meaningful list keeps files easy to find and filter in the Documents register."
+                  />
                 </Label>
                 <Input
                   id="name"

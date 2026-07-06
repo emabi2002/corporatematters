@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpLauncher } from '@/components/help/HelpButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePermissions } from '@/hooks/usePermissions';
 import {
@@ -101,8 +102,11 @@ export default function AdminPage() {
               System management &amp; configuration · Your role: {roleDescription}
             </p>
           </div>
-          <div className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 flex-shrink-0">
-            <UserCog className="h-5 w-5 text-emerald-600" />
+          <div className="flex items-center gap-2">
+            <HelpLauncher label="Learn more" />
+            <div className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 flex-shrink-0">
+              <UserCog className="h-5 w-5 text-emerald-600" />
+            </div>
           </div>
         </div>
 

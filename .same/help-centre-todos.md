@@ -1,5 +1,25 @@
 # Help & Training Centre — Enterprise Rebuild (Land Case System model)
 
+## Follow-ups (round 2) — DONE
+- [x] #2 Field '?' tooltips wired: Register (Type of Matter, Priority), Assign (officer,
+      instructions, due date), Close (reason, notes), Documents (type, stage), Tasks (priority, status)
+- [x] #3 Role-aware default: HelpProvider auto-selects the signed-in user's role (profile.role)
+      until the user explicitly picks a role; explicit choice persists in localStorage
+- [x] #1 Refined contextual content by auditing the real DOM: Dashboard tiles (Total/My Assigned/
+      Awaiting Action/Completed mo/Overdue/Due in 3 Days/Avg Turnaround/Active) + Recent Activity;
+      Register Matter rewritten to the real 4-step wizard; Reports already matched
+      NOTE: could not literally log in + click the preview iframe; refinements are DOM-accurate —
+      ask user to click through and flag anything off.
+- [x] #4 Committed + pushed to github.com/emabi2002/corporatematters
+      - gh is authenticated in THIS environment (emabi2002, repo scope) — the old push blocker is gone
+      - Reconciled local working tree against stale origin/main (fd0661b) via `git reset --soft` + `git add -A`
+      - ONE clean commit 537a2f7: 5 add / 13 delete (old help removed) / 34 modify
+      - Verified: origin/main == 537a2f7; remote src/help has only help-content.ts; old help files gone
+      - No secrets/artifacts committed (.env*, node_modules, .next excluded by .gitignore)
+      - Pushing to main triggers Netlify auto-deploy (netlify.toml)
+
+<!-- earlier build log retained below -->
+
 Model studied from `landcasesystem` repo:
 - `src/help/help-content.ts` (single source: types, roles, categories, articles, tours, route map, helpers)
 - `src/components/help/*` (HelpProvider, HelpButton, HelpDrawer, HelpCentre, HelpArticle, HelpTooltip, HelpTopicIcon, LabelWithHelp, GuidedTour, WelcomeTour, index)

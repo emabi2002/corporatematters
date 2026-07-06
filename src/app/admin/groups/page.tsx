@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -371,7 +372,13 @@ export default function GroupManagementPage() {
                   <Card className="border-emerald-300 bg-emerald-50">
                     <CardContent className="p-4 space-y-3">
                       <div>
-                        <Label>Group Name *</Label>
+                        <Label className="flex items-center gap-1.5">
+                          Group Name *
+                          <HelpTooltip
+                            title="Group Name"
+                            content="Name the group after a real job function (e.g. “Legal Officers”). Users assigned to it inherit all of its module permissions."
+                          />
+                        </Label>
                         <Input
                           value={groupForm.group_name}
                           onChange={(e) => setGroupForm({ ...groupForm, group_name: e.target.value })}
@@ -407,7 +414,13 @@ export default function GroupManagementPage() {
                       <Card className="border-blue-300 bg-blue-50">
                         <CardContent className="p-4 space-y-3">
                           <div>
-                            <Label>Group Name *</Label>
+                            <Label className="flex items-center gap-1.5">
+                          Group Name *
+                          <HelpTooltip
+                            title="Group Name"
+                            content="Name the group after a real job function (e.g. “Legal Officers”). Users assigned to it inherit all of its module permissions."
+                          />
+                        </Label>
                             <Input
                               value={groupForm.group_name}
                               onChange={(e) => setGroupForm({ ...groupForm, group_name: e.target.value })}

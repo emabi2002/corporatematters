@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 import {
   Dialog,
   DialogContent,
@@ -356,8 +357,12 @@ export default function DivisionsPage() {
 
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">
+                <Label htmlFor="name" className="flex items-center gap-1.5">
                   Division Name <span className="text-red-500">*</span>
+                  <HelpTooltip
+                    title="Division Name"
+                    content="Use the official division name so it matches the organisation chart. Divisions appear when registering matters and as a grouping in reports."
+                  />
                 </Label>
                 <Input
                   id="name"

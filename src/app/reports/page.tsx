@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpLauncher } from '@/components/help/HelpButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -498,6 +499,7 @@ export default function ReportsPage() {
             <p className="text-sm text-slate-500">Comprehensive insights and performance metrics</p>
           </div>
           <div className="flex flex-wrap items-center gap-2" data-tour="reports-period">
+            <HelpLauncher label="Learn more" />
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4 text-slate-500" />
               <Select value={selectedRange} onValueChange={setSelectedRange}>

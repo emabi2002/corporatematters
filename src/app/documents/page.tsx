@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpLauncher } from '@/components/help/HelpButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -298,6 +299,7 @@ export default function DocumentsPage() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <HelpLauncher label="Learn more" />
             <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={openUpload} data-tour="documents-upload">
               <Upload className="h-4 w-4 mr-2" />
               Upload Document

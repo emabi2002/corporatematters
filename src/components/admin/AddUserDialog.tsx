@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Shield, AlertCircle, UserPlus } from 'lucide-react';
@@ -234,6 +235,10 @@ export function AddUserDialog({ open, onOpenChange, onSuccess, groups }: AddUser
             <Label htmlFor="group" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Group Assignment *
+              <HelpTooltip
+                title="Group Assignment"
+                content="Groups grant module permissions. A user with no group can sign in but sees nothing — always assign at least one group that matches their job."
+              />
             </Label>
             <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
               <SelectTrigger id="group">

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
@@ -357,8 +358,12 @@ export default function MatterTypesPage() {
 
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">
+                <Label htmlFor="name" className="flex items-center gap-1.5">
                   Matter Type Name <span className="text-red-500">*</span>
+                  <HelpTooltip
+                    title="Matter Type Name"
+                    content="The category chosen when registering a matter. Keep the list focused and use names officers recognise — it drives the workflow and reporting by type."
+                  />
                 </Label>
                 <Input
                   id="name"

@@ -11,6 +11,11 @@ import {
   PlayCircle,
   Clock,
   Star,
+  Sparkles,
+  X,
+  MapPin,
+  Route,
+  ThumbsUp,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -33,6 +38,22 @@ export function HelpCentre() {
   const { role, setRole, startTour, recentIds, favouriteIds, recordView } = useHelp();
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+
+  // Show the "what's new" card once per browser until dismissed.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setWhatsNewOpen(window.localStorage.getItem('corporate_help_whatsnew_dismissed') !== '1');
+  }, []);
+
+  const dismissWhatsNew = () => {
+    setWhatsNewOpen(false);
+    try {
+      window.localStorage.setItem('corporate_help_whatsnew_dismissed', '1');
+    } catch {
+      /* ignore */
+    }
+  };
 
   // Deep-link support: /help?article=documents (also accepts ?topic=),
   // and /help?tour=welcome to auto-launch a guided tour.
@@ -129,6 +150,55 @@ export function HelpCentre() {
           />
         ) : (
           <>
+            {/* What's new (first-time users) */}
+            {whatsNewOpen && showBrowseExtras && (
+              <div className="relative mb-8 overflow-hidden rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-5 shadow-sm">
+                <button
+                  type="button"
+                  onClick={dismissWhatsNew}
+                  aria-label="Dismiss"
+                  className="absolute right-3 top-3 rounded-md p-1 text-slate-400 transition-colors hover:bg-emerald-100 hover:text-slate-700"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                <div className="flex items-center gap-2 text-emerald-700">
+                  <Sparkles className="h-5 w-5" />
+                  <h2 className="text-base font-bold">New: your enterprise Help &amp; Training Centre</h2>
+                </div>
+                <p className="mt-1 max-w-2xl text-sm text-slate-600">
+                  Every module now has step-by-step guidance, and help follows you around the system.
+                  Here is what you can do:
+                </p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {[
+                    { icon: MapPin, title: 'Contextual help', body: 'The Help button opens guidance for the exact page you are on.' },
+                    { icon: Route, title: 'Guided tours', body: 'Walk through the real screen step by step, highlighted as you go.' },
+                    { icon: Compass, title: 'Filtered by role', body: 'See the guidance most relevant to your role automatically.' },
+                    { icon: ThumbsUp, title: 'Save & share', body: 'Favourite articles, print or download, and rate what helped.' },
+                  ].map((f) => {
+                    const Icon = f.icon;
+                    return (
+                      <div key={f.title} className="rounded-lg border border-emerald-100 bg-white/70 p-3">
+                        <div className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+                          <Icon className="h-4 w-4 text-emerald-600" />
+                          {f.title}
+                        </div>
+                        <p className="text-xs leading-relaxed text-slate-500">{f.body}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => startTour(WELCOME_TOUR_ID)}
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
+                >
+                  <PlayCircle className="h-4 w-4" />
+                  Take the 1-minute welcome tour
+                </button>
+              </div>
+            )}
+
             {/* Role filter */}
             <div className="mb-8" data-tour="help-roles">
               <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">

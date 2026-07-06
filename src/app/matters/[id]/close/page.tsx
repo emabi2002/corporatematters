@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpLauncher } from '@/components/help/HelpButton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -231,6 +232,7 @@ export default function CloseMatterPage() {
             <h1 className="text-3xl font-bold text-emerald-900">Close Matter</h1>
             <p className="text-emerald-700 mt-1">{matter.matter_number}</p>
           </div>
+          <HelpLauncher label="Learn more" />
         </div>
 
         {/* Matter Summary */}

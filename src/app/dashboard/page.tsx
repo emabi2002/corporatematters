@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpLauncher } from '@/components/help/HelpButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -245,12 +246,15 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
             <p className="text-sm text-slate-500">Welcome back, {profile?.full_name || 'User'}</p>
           </div>
-          <Link href="/matters/new">
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
-              <FileText className="h-4 w-4 mr-2" />
-              Register Matter
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <HelpLauncher label="Learn more" />
+            <Link href="/matters/new">
+              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                <FileText className="h-4 w-4 mr-2" />
+                Register Matter
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Metric tiles */}

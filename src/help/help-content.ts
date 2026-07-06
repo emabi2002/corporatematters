@@ -341,18 +341,18 @@ export const HELP_ARTICLES: HelpArticle[] = [
       'Open the matter (or pick one from “Pending Assignment”).',
       'Click Assign.',
       'Choose the action officer best suited to the matter type and workload.',
-      'Write clear instructions describing the expected outcome.',
-      'Set a realistic due date, considering any statutory deadline.',
+      'Write clear Manager Instructions describing the expected outcome.',
+      'Optionally set a due date to override the current SLA date.',
       'Submit — the officer is notified and the matter moves to “Active”.',
     ],
     requiredFields: [
-      { name: 'Action Officer', required: true, description: 'The officer who will own and progress the matter.' },
-      { name: 'Instructions', required: true, description: 'What the officer is expected to do and deliver.' },
-      { name: 'Due Date', required: true, description: 'The target completion date for the assignment.' },
+      { name: 'Assign to Officer', required: true, description: 'The officer who will own and progress the matter.' },
+      { name: 'Manager Instructions', required: false, description: 'What the officer is expected to do and deliver. Optional, but strongly recommended so expectations are clear.' },
+      { name: 'Due Date', required: false, description: 'Optional override of the SLA due date. Leave blank to keep the current due date.' },
     ],
     validationRules: [
-      'An action officer must be selected.',
-      'A due date is required and should not pre-date the date received.',
+      'An action officer must be selected before you can assign.',
+      'The due date is optional — leaving it blank keeps the current SLA due date.',
       'Only users with assignment permission can complete this action.',
     ],
     bestPractices: [
@@ -505,14 +505,14 @@ export const HELP_ARTICLES: HelpArticle[] = [
       'Clean closure is what makes turnaround and outcome reporting meaningful. A properly closed matter is a defensible, complete record of what the department did and why.',
     steps: [
       'Open the completed matter and click Close.',
-      'Confirm the outcome and record any closing notes.',
-      'Check that the final advice or deliverable is attached.',
-      'Complete the closure checklist.',
+      'Choose a Closure Reason (Completed Successfully, Delivered Final Output, Matter Resolved, Withdrawn by Requester, Superseded or Other).',
+      'Add Closure Notes summarising the outcome for the record.',
+      'Work through the closure checklist to confirm the matter is ready to close.',
       'Submit — the matter moves to “Closed” and the closed date is stamped.',
     ],
     requiredFields: [
-      { name: 'Outcome', required: true, description: 'The result of the matter (advice given, contract executed, matter withdrawn, etc.).' },
-      { name: 'Closing Notes', required: false, description: 'A short summary for the record and future reference.' },
+      { name: 'Closure Reason', required: true, description: 'The outcome: Completed Successfully, Delivered Final Output, Matter Resolved, Withdrawn by Requester, Superseded or Other.' },
+      { name: 'Closure Notes', required: false, description: 'A short summary a future reader will understand without opening every document.' },
     ],
     validationRules: [
       'The matter should have an approved draft or recorded outcome before closing.',
@@ -983,8 +983,9 @@ export const HELP_ARTICLES: HelpArticle[] = [
     steps: [
       'Open “Reports” from the Reports & Analytics group.',
       'Choose a reporting period from the selector.',
-      'Read the metric tiles and distribution charts.',
-      'Review the officer and division breakdown tables.',
+      'Read the metric tiles — Total Matters, Closed, Active, Overdue, Average Turnaround and SLA Compliance.',
+      'Review the Monthly Trend chart and the status, priority and ageing distributions.',
+      'Check the Officer Performance and Division Breakdown tables.',
       'Export to CSV or PDF, or print, for meetings and records.',
     ],
     bestPractices: [
