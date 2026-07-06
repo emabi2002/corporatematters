@@ -1,22 +1,18 @@
 # Help & Training Centre — Enterprise Rebuild (Land Case System model)
 
-## Follow-ups (round 2) — DONE
-- [x] #2 Field '?' tooltips wired: Register (Type of Matter, Priority), Assign (officer,
-      instructions, due date), Close (reason, notes), Documents (type, stage), Tasks (priority, status)
-- [x] #3 Role-aware default: HelpProvider auto-selects the signed-in user's role (profile.role)
-      until the user explicitly picks a role; explicit choice persists in localStorage
-- [x] #1 Refined contextual content by auditing the real DOM: Dashboard tiles (Total/My Assigned/
-      Awaiting Action/Completed mo/Overdue/Due in 3 Days/Avg Turnaround/Active) + Recent Activity;
-      Register Matter rewritten to the real 4-step wizard; Reports already matched
-      NOTE: could not literally log in + click the preview iframe; refinements are DOM-accurate —
-      ask user to click through and flag anything off.
-- [x] #4 Committed + pushed to github.com/emabi2002/corporatematters
-      - gh is authenticated in THIS environment (emabi2002, repo scope) — the old push blocker is gone
-      - Reconciled local working tree against stale origin/main (fd0661b) via `git reset --soft` + `git add -A`
-      - ONE clean commit 537a2f7: 5 add / 13 delete (old help removed) / 34 modify
-      - Verified: origin/main == 537a2f7; remote src/help has only help-content.ts; old help files gone
-      - No secrets/artifacts committed (.env*, node_modules, .next excluded by .gitignore)
-      - Pushing to main triggers Netlify auto-deploy (netlify.toml)
+## Follow-ups (round 3) — DONE  [pushed 86ca5ba]
+- [x] #3 "What's new" dismissible welcome card on the Help Centre (localStorage-remembered) + welcome tour CTA
+- [x] #2 Admin form '?' tooltips: AddUser Group Assignment, Group Name, Division/Matter/Document Type names
+- [x] #4 "Learn more" HelpLauncher added to 10 page headers: dashboard, matters, matters/new,
+      assign, close, documents, tasks, reports, notifications, admin (opens the page's own article)
+- [x] #1 Audited contextual content vs real UI and corrected:
+      - Assign: Manager Instructions & Due Date are OPTIONAL (only officer required); due date overrides SLA
+      - Close: field is "Closure Reason" with preset options (Completed/Delivered/Resolved/Withdrawn/Superseded/Other)
+      - Reports: named the real tiles + Monthly Trend / distribution charts / Officer & Division tables
+      - (Dashboard tiles + 4-step Register wizard already corrected in round 2)
+      NOTE: cannot literally log into the preview iframe & click — audited via real DOM/source; ask user to
+      click through and flag any remaining wording that reads off.
+- [x] tsc 0 errors; all routes 200; committed + pushed (537a2f7..86ca5ba)
 
 <!-- earlier build log retained below -->
 

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/AppLayout';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
+import { HelpLauncher } from '@/components/help/HelpButton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -226,7 +228,8 @@ export default function MatterDetailsPage() {
               </div>
 
               {/* Quick Actions */}
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 flex-shrink-0" data-tour="matter-actions">
+                <HelpLauncher label="Learn more" />
                 {!matter.assigned_officer && (
                   <Link href={`/matters/${matter.id}/assign`}>
                     <Button variant="outline" size="sm">
@@ -738,6 +741,10 @@ export default function MatterDetailsPage() {
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-emerald-600" />
                   Land & Lease Information
+                  <HelpTooltip
+                    title="Land & Lease Information"
+                    content="The property context for this matter — portion/section, location, lease type and title references. Accurate land data links the legal work to the underlying property and supports searches."
+                  />
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -870,6 +877,10 @@ export default function MatterDetailsPage() {
                 <CardTitle className="flex items-center gap-2">
                   <Scale className="h-5 w-5 text-emerald-600" />
                   Legal Analysis
+                  <HelpTooltip
+                    title="Legal Analysis"
+                    content="The legal framing of the matter — the issues to resolve, claims, applicable law and authorities, relevant stakeholders, and the assessed risk classification."
+                  />
                 </CardTitle>
               </CardHeader>
               <CardContent>
