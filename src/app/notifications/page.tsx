@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
-import { HelpButton } from '@/components/help/HelpButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -332,7 +331,6 @@ export default function NotificationsPage() {
               <Plus className="h-4 w-4 mr-2" />
               New
             </Button>
-            <HelpButton variant="inline" articleId="notifications" label="Help" />
           </div>
         </div>
 

@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Tree-shake barrel imports so a few icons don't pull the WHOLE library into
+  // the route chunk (helps the production/Netlify build shrink lucide-react).
+  experimental: {
+    optimizePackageImports: ["lucide-react", "date-fns"],
+  },
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.

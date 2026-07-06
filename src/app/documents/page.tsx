@@ -2,8 +2,6 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { AppLayout } from '@/components/AppLayout';
-import { HelpButton } from '@/components/help/HelpButton';
-import { HelpTooltip } from '@/components/help/HelpTooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,6 +41,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { DOCUMENT_TYPES } from '@/lib/constants';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 
 type DocRow = Database['public']['Tables']['corporate_matter_documents']['Row'];
 type MatterLite = { id: string; matter_number: string; subject: string | null };
@@ -299,7 +298,6 @@ export default function DocumentsPage() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <HelpButton variant="inline" articleId="documents" label="Help" />
             <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={openUpload} data-tour="documents-upload">
               <Upload className="h-4 w-4 mr-2" />
               Upload Document
@@ -541,7 +539,10 @@ export default function DocumentsPage() {
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5">
                   Document Type
-                  <HelpTooltip id="document-type" />
+                  <HelpTooltip
+                    title="Document Type"
+                    content="Classify every upload (advice, contract, correspondence, etc.). Untyped files are hard to find later and weaken document reporting."
+                  />
                 </Label>
                 <Select
                   value={form.docType || NONE}
@@ -564,7 +565,10 @@ export default function DocumentsPage() {
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5">
                   Stage
-                  <HelpTooltip id="document-category" />
+                  <HelpTooltip
+                    title="Stage"
+                    content="Mark the version as Draft or Final so the current version is always obvious. Keep earlier drafts for the record rather than deleting history."
+                  />
                 </Label>
                 <Select
                   value={form.stage}

@@ -1,86 +1,64 @@
 'use client';
 
+import * as React from 'react';
 import { HelpCircle } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { getTooltip } from '@/help/help-content';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 interface HelpTooltipProps {
-  /** Registry id from help-tooltips.ts. */
-  id?: string;
-  /** Inline overrides (used when no id, or to override the registry). */
+  /** The explanation shown when the icon is opened. */
+  content: React.ReactNode;
+  /** Optional bold heading above the content. */
+  title?: string;
+  /** Accessible label for the trigger. */
   label?: string;
-  content?: string;
-  /** Optional element to attach the help icon beside. */
-  children?: React.ReactNode;
-  side?: 'top' | 'bottom' | 'left' | 'right';
+  side?: 'top' | 'right' | 'bottom' | 'left';
+  align?: 'start' | 'center' | 'end';
   className?: string;
   iconClassName?: string;
 }
 
 /**
- * Context help. Renders a small "?" affordance that reveals guidance on hover,
- * focus or tap. Reference shared copy with `id`, or pass `content` inline.
+ * A small "?" icon that reveals a short explanation for a field or action.
+ * Opens on hover (desktop) and on focus/tap (all devices) for accessibility.
  */
 export function HelpTooltip({
-  id,
-  label,
   content,
-  children,
+  title,
+  label = 'More information',
   side = 'top',
+  align = 'center',
   className,
   iconClassName,
 }: HelpTooltipProps) {
-  const def = id ? getTooltip(id) : undefined;
-  const text = content ?? def?.content ?? '';
-  const title = label ?? def?.label;
-
-  if (!text) return <>{children}</>;
-
-  const icon = (
-    <TooltipProvider delayDuration={120}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            aria-label={title ? `Help: ${title}` : 'Help'}
-            onClick={(e) => e.preventDefault()}
-            className={cn(
-              'inline-flex h-4 w-4 items-center justify-center rounded-full text-slate-400 transition-colors hover:text-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40',
-              iconClassName
-            )}
-          >
-            <HelpCircle className="h-3.5 w-3.5" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent
-          side={side}
-          className="max-w-[16rem] bg-slate-900 text-left"
-        >
-          {title && (
-            <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-300">
-              {title}
-            </p>
+  const [open, setOpen] = React.useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label={title ? `Help: ${title}` : label}
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setOpen(false)}
+          className={cn(
+            'inline-flex h-4 w-4 items-center justify-center rounded-full text-slate-400 transition-colors hover:text-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40',
+            className,
           )}
-          <p className="text-xs font-normal leading-snug text-slate-100">{text}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+        >
+          <HelpCircle className={cn('h-4 w-4', iconClassName)} />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        side={side}
+        align={align}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="w-64 rounded-lg border-slate-200 p-3 text-sm shadow-lg"
+      >
+        {title && <p className="mb-1 font-semibold text-slate-900">{title}</p>}
+        <div className="leading-relaxed text-slate-600">{content}</div>
+      </PopoverContent>
+    </Popover>
   );
-
-  if (children) {
-    return (
-      <span className={cn('inline-flex items-center gap-1.5', className)}>
-        {children}
-        {icon}
-      </span>
-    );
-  }
-
-  return <span className={className}>{icon}</span>;
 }

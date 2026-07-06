@@ -27,9 +27,8 @@ import {
   MATTER_STATUS,
   ACTION_TYPES,
 } from '@/lib/workflow-constants';
-import { HelpTooltip } from '@/components/help/HelpTooltip';
-import { HelpButton } from '@/components/help/HelpButton';
 import Link from 'next/link';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 
 type Matter = Database['public']['Tables']['corporate_matters']['Row'];
 type Document = Database['public']['Tables']['corporate_matter_documents']['Row'];
@@ -232,7 +231,6 @@ export default function CloseMatterPage() {
             <h1 className="text-3xl font-bold text-emerald-900">Close Matter</h1>
             <p className="text-emerald-700 mt-1">{matter.matter_number}</p>
           </div>
-          <HelpButton variant="inline" articleId="matter-closure" label="Help" />
         </div>
 
         {/* Matter Summary */}
@@ -328,7 +326,13 @@ export default function CloseMatterPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="closure_reason">Closure Reason</Label>
+              <Label htmlFor="closure_reason" className="flex items-center gap-1.5">
+                Closure Reason
+                <HelpTooltip
+                  title="Closure Reason"
+                  content="The outcome of the matter (advice given, output delivered, resolved, withdrawn, superseded, etc.). A clear reason makes turnaround and outcome reporting meaningful."
+                />
+              </Label>
               <Select
                 value={formData.closure_reason}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, closure_reason: value }))}
@@ -350,7 +354,10 @@ export default function CloseMatterPage() {
             <div className="space-y-2" data-tour="closure-summary">
               <Label htmlFor="closure_notes" className="flex items-center gap-1.5">
                 Closure Notes
-                <HelpTooltip content="Summarise the outcome and the deliverable provided, so a future reader understands the matter without opening every tab." />
+                <HelpTooltip
+                  title="Closure Notes"
+                  content="A short summary a future reader will understand without opening every document. Attach the final deliverable before closing so the record is complete."
+                />
               </Label>
               <Textarea
                 id="closure_notes"
@@ -409,7 +416,6 @@ export default function CloseMatterPage() {
                   Cancel
                 </Button>
               </Link>
-              <HelpTooltip id="close-matter" />
               <Button
                 onClick={handleCloseMatter}
                 disabled={submitting || !formData.final_output_verified}

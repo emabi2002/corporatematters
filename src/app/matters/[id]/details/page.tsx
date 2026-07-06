@@ -26,8 +26,6 @@ import {
   ACTION_TYPES,
 } from '@/lib/workflow-constants';
 import { RISK_CLASSIFICATIONS } from '@/lib/constants';
-import { HelpTooltip } from '@/components/help/HelpTooltip';
-import { HelpButton } from '@/components/help/HelpButton';
 import Link from 'next/link';
 
 type Matter = Database['public']['Tables']['corporate_matters']['Row'];
@@ -236,7 +234,6 @@ export default function MatterDetailsCompletionPage() {
             <h1 className="text-3xl font-bold text-emerald-900">Complete Matter Details</h1>
             <p className="text-emerald-700 mt-1">{matter.matter_number} - {matter.subject || matter.type_of_matter}</p>
           </div>
-          <HelpButton variant="inline" articleId="matter-details" label="Help" />
         </div>
 
         {/* File References Section */}
@@ -250,7 +247,6 @@ export default function MatterDetailsCompletionPage() {
               <div className="space-y-2">
                 <Label htmlFor="file_reference" className="flex items-center gap-1.5">
                   Main File Reference
-                  <HelpTooltip content="Primary DLPP file reference for this matter. Use your office numbering convention (e.g. DLPP/CMS/2024/001)." />
                 </Label>
                 <Input
                   id="file_reference"
@@ -337,7 +333,6 @@ export default function MatterDetailsCompletionPage() {
             <div className="space-y-2">
               <Label htmlFor="legal_issues" className="flex items-center gap-1.5">
                 Legal Issues
-                <HelpTooltip content="Set out each legal issue the matter raises, clearly and separately. Stating each as a question (‘Whether…’) helps keep the analysis focused." />
               </Label>
               <Textarea
                 id="legal_issues"
@@ -362,7 +357,6 @@ export default function MatterDetailsCompletionPage() {
             <div className="space-y-2">
               <Label htmlFor="applicable_law" className="flex items-center gap-1.5">
                 Applicable Law
-                <HelpTooltip content="Cite the legislation, regulations, case law or legal principles that govern the issues. Precise section numbers and citations help reviewers." />
               </Label>
               <Textarea
                 id="applicable_law"
@@ -407,7 +401,6 @@ export default function MatterDetailsCompletionPage() {
             <div className="space-y-2">
               <Label htmlFor="risk_classification" className="flex items-center gap-1.5">
                 Risk Classification
-                <HelpTooltip id="risk-classification" />
               </Label>
               <Select
                 value={formData.risk_classification}

@@ -2,6 +2,13 @@
 
 import { useEffect } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
+import {
+  HelpProvider,
+  HelpButton,
+  HelpDrawer,
+  GuidedTour,
+  WelcomeTour,
+} from "@/components/help";
 
 export default function ClientBody({
   children,
@@ -16,7 +23,13 @@ export default function ClientBody({
 
   return (
     <AuthProvider>
-      <div className="antialiased">{children}</div>
+      <HelpProvider>
+        <div className="antialiased">{children}</div>
+        <HelpButton />
+        <HelpDrawer />
+        <GuidedTour />
+        <WelcomeTour />
+      </HelpProvider>
     </AuthProvider>
   );
 }

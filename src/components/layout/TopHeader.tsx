@@ -16,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { NotificationBell } from '@/components/NotificationBell';
-import { HelpButton } from '@/components/help/HelpButton';
 import { usePermissions } from '@/hooks/usePermissions';
 import { createClient } from '@/lib/supabase';
 import { getWorkflowStageColor } from '@/lib/workflow-constants';
@@ -33,7 +32,9 @@ import {
   Loader2,
   CornerDownLeft,
   X,
+  HelpCircle,
 } from 'lucide-react';
+import { useHelp } from '@/components/help/HelpProvider';
 
 interface TopHeaderProps {
   sidebarCollapsed?: boolean;
@@ -74,6 +75,7 @@ export function TopHeader({
   onMobileToggle,
 }: TopHeaderProps) {
   const { user, profile, signOut } = useAuth();
+  const { openHelp } = useHelp();
   const router = useRouter();
   const { roleDescription, roleColor } = usePermissions();
   const supabase = createClient();
@@ -379,8 +381,17 @@ export function TopHeader({
           <Search className="h-5 w-5" />
         </Button>
 
-        {/* Contextual help */}
-        <HelpButton variant="icon" className="hidden sm:inline-flex" />
+        {/* Contextual help launcher */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => openHelp()}
+          className="text-slate-600 hover:text-emerald-700"
+          aria-label="Help for this page"
+          title="Help for this page"
+        >
+          <HelpCircle className="h-5 w-5" />
+        </Button>
 
         <span data-tour="notification-bell" className="inline-flex">
           <NotificationBell />

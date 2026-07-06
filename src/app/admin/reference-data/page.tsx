@@ -17,7 +17,6 @@ import {
 import { usePermissions } from '@/hooks/usePermissions';
 import { createClient } from '@/lib/supabase';
 import { Building2, FileText, Upload, Tag, Plus, Edit, Trash2, ArrowLeft } from 'lucide-react';
-import { HelpButton } from '@/components/help/HelpButton';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -154,7 +153,6 @@ export default function ReferenceDataPage() {
             <h1 className="text-2xl font-bold text-slate-900">Reference Data Management</h1>
             <p className="text-sm text-slate-500">Manage divisions, matter types, and document types</p>
           </div>
-          <HelpButton variant="inline" articleId="reference-data" label="Help" className="ml-auto" />
         </div>
 
         {/* Stats tiles */}

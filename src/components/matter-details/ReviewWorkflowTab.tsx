@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { HelpTooltip } from '@/components/help/HelpTooltip';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -328,7 +327,6 @@ export function ReviewWorkflowTab({ matterId, matter, onMatterUpdate }: ReviewWo
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {!doc.review_status && (
                         <>
-                          <HelpTooltip id="submit-review" />
                           <Button
                             size="sm"
                             onClick={() => handleSubmitForReview(doc.id)}

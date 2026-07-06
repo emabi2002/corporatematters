@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/AppLayout';
-import { HelpTooltip } from '@/components/help/HelpTooltip';
-import { HelpButton } from '@/components/help/HelpButton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 import { createClient } from '@/lib/supabase';
 import type { Database } from '@/lib/database.types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -324,7 +323,6 @@ export default function NewMatterPage() {
             <h1 className="text-3xl font-bold text-emerald-900">Register New Matter</h1>
             <p className="text-emerald-700 mt-1">Multi-step workflow registration process</p>
           </div>
-          <HelpButton variant="inline" articleId="register-new-matter" label="Help" />
         </div>
 
         {/* Progress Steps */}
@@ -415,7 +413,10 @@ export default function NewMatterPage() {
                   <div className="space-y-2">
                     <Label htmlFor="type_of_matter" className="flex items-center gap-1.5">
                       Type of Matter <span className="text-red-500">*</span>
-                      <HelpTooltip id="matter-type" />
+                      <HelpTooltip
+                        title="Type of Matter"
+                        content="The category of corporate matter (advice, contract, legislation, litigation, etc.). This choice drives the workflow the matter follows and how it is reported."
+                      />
                     </Label>
                     <Select
                       value={formData.type_of_matter}
@@ -437,7 +438,10 @@ export default function NewMatterPage() {
                   <div className="space-y-2">
                     <Label htmlFor="priority" className="flex items-center gap-1.5">
                       Priority
-                      <HelpTooltip id="priority" />
+                      <HelpTooltip
+                        title="Priority"
+                        content="Routine, Medium, High or Urgent. Priority drives sorting, dashboard alerts and overdue tracking — reserve “Urgent” for genuinely time-critical matters."
+                      />
                     </Label>
                     <Select
                       value={formData.priority}

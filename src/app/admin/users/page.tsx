@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import { AppLayout } from '@/components/AppLayout';
-import { HelpButton } from '@/components/help/HelpButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -213,7 +212,6 @@ export default function UsersAdminPage() {
             <p className="text-sm text-slate-500">Manage user accounts and group assignments</p>
           </div>
           <div className="flex items-center gap-2">
-            <HelpButton variant="inline" articleId="user-management" label="Help" />
             <Button
               onClick={() => setCreateUserDialogOpen(true)}
               size="sm"

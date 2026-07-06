@@ -1,5 +1,95 @@
 # DLPP Corporate Matters - Clone Status
 
+## Help feature FULLY REMOVED (round 10) — DONE
+- [x] Deleted dirs: src/help, src/components/help, src/app/help (the /help route), public/help
+- [x] Removed HelpProvider/HelpButton/HelpDrawer/GuidedTour from AppLayout (unwrapped shell)
+- [x] Removed HelpButton (icon) from TopHeader
+- [x] Removed "Help & Training" sidebar nav group + unused LifeBuoy/GraduationCap icons
+- [x] Removed all HelpButton/HelpTooltip imports+usages from 13 files
+      (admin/reference-data, admin/users, admin/AddUserDialog, documents, tasks,
+       reports, notifications, matters/new, matters/[id], matters/[id]/assign,
+       matters/[id]/close, matters/[id]/details, matter-details/ReviewWorkflowTab)
+- [x] Removed react-joyride dependency; removed leftover driver.js CSS from globals.css
+- [x] Left inert data-tour="..." attributes (harmless markers, no runtime effect)
+- [x] Verified: grep CLEAN (no help refs), tsc 0 errors, all routes 200,
+      /help -> 404, 0 corrupt chunks
+
+<!-- ARCHIVE BELOW: previous rounds -->
+
+## Dashboard chunk corruption fix (round 8) — DONE
+- [x] Symptom: login SUCCEEDS + "redirecting to dashboard", then /dashboard shows
+      "Application error: a client-side exception has occurred".
+- [x] Exact browser error: `Uncaught SyntaxError: missing ) after argument list`
+      at app/dashboard/page.js:35226 + `ChunkLoadError: Loading chunk
+      app/dashboard/page failed` -> the emitted dashboard chunk was TRUNCATED.
+- [x] ROOT CAUSE: TWO dev servers were running at once (ps: 2 `next dev`, 2
+      `next-server`). Both wrote to .next concurrently, truncating the huge
+      15.6 MB app/dashboard/page.js chunk mid-write. Confirmed the environment
+      does NOT auto-restart the dev server (killed all -> 0 stayed for 15s), so
+      the duplicates came from repeated manual `bun run dev` starts stacking up.
+- [x] FIX: pkill ALL next, rm -rf .next, start EXACTLY ONE dev server, warm
+      / -> /auth/login -> /dashboard with that single server.
+- [x] Verified: app/dashboard/page.js now parses (node --check OK, 15.6MB/35335 lines).
+- [x] Verified: all 56 emitted chunks parse cleanly (0 corrupt).
+- [x] Verified: login 200 in 0.12s, dashboard 200 in 0.05s, exactly 1 dev server.
+- [x] RULE GOING FORWARD: never start a 2nd dev server; always pkill before start.
+- [ ] AWAITING USER: HARD-REFRESH the preview (Ctrl/Cmd+Shift+R) to drop the
+      cached corrupted chunk, then log in -> dashboard should load.
+
+## Login "Sign In does nothing" — ROOT CAUSE FOUND & FIXED (round 7)
+- [x] Symptom: after typing email + password, the email box showed EMPTY and
+      the browser blocked submit with "Please fill out this field" -> nothing happened
+- [x] Root cause (from captured runtime error): HYDRATION MISMATCH on the login
+      form. Browser extensions (Grammarly = `grm ERROR` in console) inject
+      attributes into the email <input> before React hydrates. React bails on
+      the mismatched element and RESETS the controlled email field to empty.
+      The password field (type=password) is untouched by Grammarly -> it kept
+      its value. That's why password stuck but email vanished.
+- [x] Fix 1 (definitive): render the login FORM client-only (behind a `hydrated`
+      flag). No server-rendered form -> extensions can't cause a hydration
+      mismatch -> email is never wiped.
+- [x] Fix 2: supabase-js Web Locks bypass (navigator.locks can hang in a
+      sandboxed iframe so signInWithPassword never resolved) — in src/lib/supabase.ts
+- [x] Fix 3: iframe-safe storage (memory fallback if localStorage blocked)
+- [x] Fix 4: redirect via `router.replace` on the AuthContext `user` effect
+      (SPA nav keeps the JS context/session — safer than full reload in iframe)
+- [x] Fix 5: JS validation + inline error + on-screen status + build badge (v15)
+- [x] Verified: SSR HTML has NO email input; all chunks parse; tsc 0 errors;
+      login + dashboard 200; supabase auth returns a token for the master login
+- [x] Login redirect loop fix (round 7) — DONE
+  - [x] Symptom: after entering corporate@dlpp.gov.pg / Corporate@2025 + Sign In,
+        the form reloaded back to the empty login (native "Please fill out this field")
+  - [x] Root cause: login used window.location.assign('/dashboard') = FULL PAGE RELOAD.
+        In the sandboxed preview iframe localStorage is blocked, so the Supabase
+        session fell back to in-memory storage and was WIPED by the reload ->
+        dashboard saw no session -> AppLayout bounced back to /auth/login (loop).
+  - [x] Fix 1: login now navigates client-side via router.replace('/dashboard'),
+        driven by a useEffect watching the auth `user` (no reload, no race).
+  - [x] Fix 2: supabase storage now falls back localStorage -> COOKIES -> memory,
+        so the session also survives a hard refresh when localStorage is blocked.
+  - [x] Gotcha: first edit_file left a HYBRID old/new file (old v15 hydration gate +
+        new logic) -> deleted the file and recreated it clean (BUILD_MARKER v16).
+  - [x] Verified: /auth/login SSR renders the full form; badge shows "App ready v16".
+  - [x] Verified: signInWithPassword (app config + lock passthrough) resolves w/ session.
+  - [x] Verified: profiles row readable via RLS (role=system_administrator).
+  - [x] Verified: /auth/login and /dashboard both HTTP 200; tsc 0 errors; lint clean.
+  - [ ] AWAITING USER: hard-refresh preview, confirm "build v16", log in -> dashboard.
+- NOTE: only login page had been reverted earlier; supabase.ts + AuthContext
+      fixes were intact (confirmed).
+
+## Client-side exception fix (round 6) — DONE
+- [x] Symptom: login page rendered then threw "a client-side exception has occurred"
+- [x] Root cause: corrupted/stale `.next` dev cache emitting a malformed JS chunk
+      (runtime errors: `SyntaxError: missing ) after argument list` +
+       `ChunkLoadError: Loading chunk app/dashboard/page failed`)
+- [x] Confirmed SOURCE is clean: `bun run build` compiles all 21 routes with 0 errors
+- [x] Fix: killed dev server, `rm -rf .next` + tsconfig.tsbuildinfo, rebuilt fresh
+- [x] Verified: all 13 emitted dev chunks pass `node --check` (parse cleanly)
+- [x] Verified: NEXT_PUBLIC_SUPABASE_URL + anon key embedded in client bundle
+- [x] Verified: Supabase auth returns a token for corporate@dlpp.gov.pg / Corporate@2025
+- [x] Confirmed only ONE dev server running (concurrent .next writes corrupt chunks)
+- [x] Removed leftover temp page src/app/menu-check/page.tsx
+
 ## CRUD on Management pages (round 5)
 - [x] Documents: Upload (matter+file+type+stage), Edit metadata, Delete (+storage), Download
 - [x] Tasks: Create/Edit dialog (matter, type, assignee, priority, status, due date),
@@ -153,3 +243,13 @@
 - [x] Matters register "Assigned To" column now shows officer full name (profile map); column visible by default
 - [x] Production build passes; /api/admin/users is dynamic; 401 when unauth
 - [ ] PROD NOTE: set SUPABASE_SERVICE_ROLE_KEY in Netlify env (server-side, NOT in repo) for create/delete to work live
+
+## Active tasks (round 4) — IN PROGRESS
+- [x] Compact/dense layout for Reports page (src/app/reports/page.tsx)
+- [x] Wire header search -> navigates to /matters?q=... and filters list
+- [x] Sidebar: tooltips on collapsed group buttons + footer with user/role
+- [x] Commit all changes to GitHub repo
+
+## Optional follow-ups
+- [ ] Apply the compact density style to remaining internal pages
+- [ ] NOTE: log in (corporate@dlpp.gov.pg / Corporate@2025) to see the authed shell in preview

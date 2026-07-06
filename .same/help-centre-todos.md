@@ -1,104 +1,50 @@
-# Interactive Help & Training Centre — Build Plan
+# Help & Training Centre — Enterprise Rebuild (Land Case System model)
 
-## Engine
-- [x] Install react-joyride (2.9.3)
-- [x] Types: src/help/help-types.ts
-- [x] Content: src/help/help-articles.ts (20 modules, full sections)
-- [x] Content: src/help/help-tours.ts (19 guided tours)
-- [x] Content: src/help/help-tooltips.ts (context tooltips registry)
-- [x] Content: src/help/help-content.ts (aggregator: categories, route map, quick start, shortcuts, FAQ, roles, search)
-- [x] Export: src/help/help-export.ts (print + PDF)
+Model studied from `landcasesystem` repo:
+- `src/help/help-content.ts` (single source: types, roles, categories, articles, tours, route map, helpers)
+- `src/components/help/*` (HelpProvider, HelpButton, HelpDrawer, HelpCentre, HelpArticle, HelpTooltip, HelpTopicIcon, LabelWithHelp, GuidedTour, WelcomeTour, index)
+- `src/app/help/page.tsx`
+- Mounted in ClientBody: `<HelpProvider>{children}<HelpButton/><HelpDrawer/><WelcomeTour/></HelpProvider>`
 
-## Components (src/components/help/)
-- [x] HelpProvider (context: drawer, recent, favourites, tour, feedback, keyboard shortcuts)
-- [x] HelpButton (floating + icon/inline variants)
-- [x] HelpDrawer (right-side, route-aware article)
-- [x] HelpTooltip (context help wrapper + registry)
-- [x] HelpArticleView (renders full article)
-- [x] HelpBreadcrumb
-- [x] RelatedTopics
-- [x] HelpSearch (instant, keyboard nav)
-- [x] GuidedTour (react-joyride wrapper, resilient targets)
-- [x] HelpCentre (/help page content)
+Adapt to Corporate Matters: EMERALD branding (not purple), 9 corporate roles, self-contained tour engine (no external dep).
 
-## Page
-- [x] /help route (AppLayout + HelpCentre, ?article deep links)
+## Build steps
+- [x] 1. `src/help/help-content.ts` — types (enhanced: routes, businessPurpose, validationRules, faqs, nextSteps), 9 roles + labels, 8 categories, 28 articles, 16 tours, route map, helpers
+- [x] 2. `src/components/help/HelpTopicIcon.tsx` — lucide icon map
+- [x] 3. `src/components/help/GuidedTour.tsx` — self-contained tour engine (useGuidedTour) — NO external dep
+- [x] 4. `src/components/help/HelpProvider.tsx` — context (route-aware, role, recently-viewed, favourites)
+- [x] 5. `src/components/help/HelpTooltip.tsx` + `LabelWithHelp.tsx`
+- [x] 6. `src/components/help/HelpArticle.tsx` — full renderer (purpose, business purpose, steps, fields, validation, tips, mistakes, faqs, next steps, related, print/download, favourite, was-this-helpful)
+- [x] 7. `src/components/help/HelpDrawer.tsx` — contextual drawer (search, role, home + article)
+- [x] 8. `src/components/help/HelpCentre.tsx` — full page (hero search, role pills, categories, tour launcher, recent, favourites, article reader, ?article/?tour deep links)
+- [x] 9. `src/components/help/WelcomeTour.tsx` + `HelpButton.tsx` (+ HelpLauncher) + `index.ts`
+- [x] 10. `src/app/help/page.tsx`
+- [x] 11. Mount in ClientBody (inside AuthProvider): HelpProvider + HelpButton + HelpDrawer + GuidedTour + WelcomeTour
+- [x] 12. Sidebar "Help & Training" group (Help Centre + Guided Tours) + TopHeader help icon button
+- [x] 13. data-tour anchors — ALL 105 anchors already on disk from prior session; every tour target resolves
+- [x] 14. Lint (0 errors, only pre-existing warnings), tsc 0 errors, all routes 200
+- [x] 15. Versioned (v23, v24). Preview screenshot shows login/loading because the preview is unauthenticated — Help UI only shows on authed pages (by design). Verified via tsc + route 200s + cross-reference script instead.
+- [x] 16. Wired HelpTooltip "?" icons onto Register Matter fields (Type of Matter, Priority)
+- [x] 17. Cross-reference validation: 28 articles / 16 tours / 8 categories / 9 roles; all relatedIds/tourIds/articleIds resolve; all 22 required routes map correctly
 
-## Integration
-- [x] HelpProvider + floating button + drawer + tour in ClientBody
-- [x] "Help & Training" menu (Help Centre + Guided Tours) in Sidebar (+ data-tour="sidebar")
-- [x] Help icon in TopHeader (+ data-tour anchors: header-search, notification-bell, user-menu)
-- [x] data-tour anchors on Dashboard + Matters register + New Matter link
-- [x] Example HelpTooltips wired on details page (file ref, legal issues, applicable law, risk)
+## To see it: log in (corporate@dlpp.gov.pg / Corporate@2025), then:
+- Floating emerald Help button (bottom-right) + Help icon in the header open the contextual drawer for the current page
+- Sidebar "Help & Training" > Help Centre (/help) or Guided Tours
+- First login auto-starts the Welcome Tour
 
-## QA
-- [x] Route mapping: each route resolves to correct help article
-- [x] Search filters instantly (weighted, multi-term)
-- [x] Role-based help renders per role (recommendations)
-- [x] Print / PDF / feedback / favourites / recent implemented
-- [x] tsc 0 errors; all routes 200 (/ /help /dashboard /matters /matters/new /notifications /reports /admin/users)
-- [~] Version created (v4/v5); screenshot service intermittently failing — verified via HTML + curl instead
+## Corporate roles
+legal_secretary, legal_officer_corporate, senior_legal_officer_corporate,
+legal_officer_legislation, manager_legal_services, director_policy_legal,
+deputy_secretary, secretary, system_administrator
 
-## Notes
-- Tours are resilient: any missing [data-tour] target becomes a centered step, so every tour runs on any page.
-- To see the authed Help Centre in preview, log in (corporate@dlpp.gov.pg / Corporate@2025) then click the floating Help button or open /help.
+## Articles (28)
+login, dashboard, matter-register, register-new-matter, matter-assignment,
+my-matters, pending-assignment, pending-review, matter-details, land-lease-details,
+legal-issues, stakeholders, documents, tasks, draft-review, notifications,
+matter-closure, reports, admin, user-management, groups-permissions, divisions,
+matter-types, document-types, reference-data, activity-timeline, audit-trail, help-centre
 
-## Round 2 — richer highlighting, tooltips, media, tour targeting
-- [x] Tour targeting review (New User Tour): anchors verified on /dashboard; fixed two issues:
-      - Floating FAB now uses data-tour="help-fab" (was shared with hidden header icon)
-      - GuidedTour now treats invisible (display:none / 0-size) targets as centered steps
-- [x] data-tour anchors added across pages (40+ anchors, all cross-referenced by tours):
-      matter [id] (header, tabs), assign (officer/instructions/due-date/submit),
-      close (checks/summary/submit), reports (period/metrics/charts),
-      admin/users (add/table), admin/reference-data (add/list),
-      documents (upload/search/table), tasks (new/filters/table),
-      notifications (tabs/list), review tab (submit/history), wizard steps 1-4
-      + #risk_classification id added so that field highlights
-- [x] Context tooltips wired on remaining forms:
-      registration wizard (Type of Matter, Priority), tasks dialog (Priority, Status),
-      documents upload (Document Type, Stage), user management (Group Assignment)
-      (details page already had file ref / legal issues / applicable law / risk)
-- [x] Inline "Help" launchers added to page headers: new matter, assign, close,
-      reports, documents, tasks, notifications, admin users, reference data
-- [x] Media system: HelpMedia type (image | video | youtube | tour) + renderer in HelpArticleView
-      - Branded SVG "annotated screenshots" in /public/help (dashboard, matter-register, reports, workflow)
-      - Attached to dashboard, matter-register, register-new-matter, documents, reports, draft-review
-      - Interactive-walkthrough launcher shown in place of a recorded video
-      - Real screenshots/videos now drop in via a URL — no code changes
-- [x] tsc 0 errors; SVG assets serve 200; article media verified rendering
-- [ ] Deploy: commit + push to github.com/emabi2002/corporatematters
-
-## Round 3 — embed like landcasesystem (mount in AppLayout)
-- [x] Moved Help mounting OUT of root ClientBody and INTO the authenticated shell:
-      AppLayout now renders <HelpProvider><HelpButton/><HelpDrawer/><GuidedTour/>
-- [x] ClientBody reverted to AuthProvider only (no Help on login/unauth pages)
-- [x] Cross-route tours preserved despite AppLayout remounting on navigation:
-      startTour hands the tour off via sessionStorage; HelpProvider resumes it on mount
-- [x] Verified floating Help button is ABSENT on /auth/login and PRESENT in the authed shell
-- [x] Route mapping verified end-to-end (script):
-      /dashboard->dashboard, /matters->matter-register, /matters/new & /matters/register->register-new-matter,
-      /matters/[id]->matter-details, /assign->matter-assignment, /details->matter-details,
-      /review->draft-review, /close->matter-closure, /notifications->notifications, /reports->reports,
-      /admin->admin (NEW), /admin/users->user-management, /admin/reference-data->reference-data,
-      /help->help-centre, unknown->help-centre (fallback)
-- [x] Added dedicated Admin Panel article + Admin tour (/admin)
-- [x] Added spec example tooltips on real controls: Matter Number & Workflow Stage (matter header),
-      Submit for Review (review tab), Close Matter (closure page)
-- [x] tsc 0 errors; all routes 200; drawer/button/tour mount confirmed
-
-## Round 4 — tab auto-switch + remaining tab anchors
-- [x] Added HelpTourStep.activateTab: a tour step can name a tab trigger to open before it runs
-- [x] GuidedTour auto-switches tabs: pre-activates first step's tab, activates the next
-      step's tab on step:after (content mounts in time) and re-asserts on step:before;
-      build keeps content targets (not centered) when their tab trigger exists
-- [x] Added anchors to remaining matter-detail tabs: tab-registration, tab-assignment,
-      tab-documents, tab-tasks, tab-reviews (+ content: registration-content,
-      assignment-content, matter-documents-content, reviews-content)
-- [x] Retargeted tours to real tab elements with activateTab:
-      land->tab-land, legal->tab-legal, stakeholders->tab-legal, timeline->tab-timeline,
-      audit->tab-audit, draft-review->tab-reviews (reviews-content)
-- [x] Matter Details tour now walks Registration -> Assignment -> Documents -> Reviews,
-      auto-switching tabs as it goes (demonstrates the feature)
-- [x] Verified: every tour selector + every activateTab trigger maps to a real anchor;
-      tsc 0 errors; all routes 200
-- [x] Pushed round 3 to GitHub (f63f108)
+## Tours (16)
+welcome, dashboard, matter-register, register-new-matter, matter-assignment,
+matter-details, documents, tasks, draft-review, notifications, matter-closure,
+reports, admin, user-management, reference-data, help-centre

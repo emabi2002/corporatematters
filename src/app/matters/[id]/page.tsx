@@ -34,8 +34,6 @@ import {
 } from 'lucide-react';
 import { DocumentsTab } from '@/components/matter-details/DocumentsTab';
 import { TasksTab } from '@/components/matter-details/TasksTab';
-import { HelpTooltip } from '@/components/help/HelpTooltip';
-import { HelpButton } from '@/components/help/HelpButton';
 import Link from 'next/link';
 import {
   getWorkflowStageColor,
@@ -198,10 +196,8 @@ export default function MatterDetailsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h1 className="text-xl font-bold text-slate-900 truncate">{matter.matter_number}</h1>
-                    <HelpTooltip id="matter-number" />
                     <Badge variant="outline" className={cn('inline-flex items-center gap-1', getWorkflowStageColor(matter.workflow_stage))}>
                       {matter.workflow_stage}
-                      <HelpTooltip id="workflow-stage" iconClassName="text-current opacity-70" />
                     </Badge>
                     <Badge variant="outline" className={getPriorityColor(matter.priority)}>
                       {matter.priority}
@@ -231,7 +227,6 @@ export default function MatterDetailsPage() {
 
               {/* Quick Actions */}
               <div className="flex items-center gap-2 flex-shrink-0">
-                <HelpButton variant="icon" articleId="matter-details" />
                 {!matter.assigned_officer && (
                   <Link href={`/matters/${matter.id}/assign`}>
                     <Button variant="outline" size="sm">

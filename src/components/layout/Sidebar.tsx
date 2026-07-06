@@ -156,7 +156,7 @@ export function Sidebar({
       defaultOpen: false,
       items: [
         { name: 'Help Centre', href: '/help', icon: LifeBuoy },
-        { name: 'Guided Tours', href: '/help?view=tours', icon: GraduationCap },
+        { name: 'Guided Tours', href: '/help?tour=welcome', icon: GraduationCap },
       ],
     },
   ];

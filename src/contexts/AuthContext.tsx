@@ -27,15 +27,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session ? 'exists' : 'null');
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        console.log('Initial session:', session ? 'exists' : 'null');
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        // Never let a storage/network hiccup leave the app stuck loading.
+        console.error('getSession failed:', err);
         setLoading(false);
-      }
-    });
+      });
 
     // Listen for auth changes
     const {
@@ -115,11 +122,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    console.log('[auth] signInWithPassword ->', email);
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    if (error) throw error;
+    if (error) {
+      console.error('[auth] signIn error:', error.message);
+      throw error;
+    }
+    console.log('[auth] signIn success, session:', !!data.session);
   };
 
   const signOut = async () => {

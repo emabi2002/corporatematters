@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 import { createClient } from '@/lib/supabase';
 import type { Database } from '@/lib/database.types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,8 +28,6 @@ import {
   SLA_CONSTANTS,
 } from '@/lib/workflow-constants';
 import { notifyMatterAssigned } from '@/lib/notification-helpers';
-import { HelpTooltip } from '@/components/help/HelpTooltip';
-import { HelpButton } from '@/components/help/HelpButton';
 import Link from 'next/link';
 
 type Matter = Database['public']['Tables']['corporate_matters']['Row'];
@@ -232,7 +231,6 @@ export default function AssignMatterPage() {
             <h1 className="text-3xl font-bold text-emerald-900">Assign Matter</h1>
             <p className="text-emerald-700 mt-1">{matter.matter_number}</p>
           </div>
-          <HelpButton variant="inline" articleId="matter-assignment" label="Help" />
         </div>
 
         {/* Matter Summary */}
@@ -270,7 +268,10 @@ export default function AssignMatterPage() {
             <div className="space-y-2" data-tour="assign-officer">
               <Label htmlFor="assigned_to" className="flex items-center gap-1.5">
                 Assign to Officer <span className="text-red-500">*</span>
-                <HelpTooltip id="assign-officer" />
+                <HelpTooltip
+                  title="Assign to Officer"
+                  content="The officer who will own and progress this matter. Match the officer to the matter type and current workload — check the Dashboard first."
+                />
               </Label>
               <Select
                 value={formData.assigned_to}
@@ -294,7 +295,10 @@ export default function AssignMatterPage() {
             <div className="space-y-2" data-tour="assign-instructions">
               <Label htmlFor="instructions" className="flex items-center gap-1.5">
                 Manager Instructions
-                <HelpTooltip content="Explain the required output, scope and any special considerations. These instructions are visible to the assigned officer." />
+                <HelpTooltip
+                  title="Manager Instructions"
+                  content="State the expected deliverable, not just the task (for example, “Draft advice on…”). These instructions are visible to the assigned officer."
+                />
               </Label>
               <Textarea
                 id="instructions"
@@ -311,7 +315,10 @@ export default function AssignMatterPage() {
             <div className="space-y-2" data-tour="assign-due-date">
               <Label className="flex items-center gap-1.5">
                 Due Date
-                <HelpTooltip id="due-date" />
+                <HelpTooltip
+                  title="Due Date"
+                  content="The target completion date for this assignment. Leave room before any statutory or client deadline so there is time to review the draft."
+                />
               </Label>
               <DatePicker
                 date={formData.due_date}

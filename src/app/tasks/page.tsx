@@ -2,8 +2,6 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { AppLayout } from '@/components/AppLayout';
-import { HelpButton } from '@/components/help/HelpButton';
-import { HelpTooltip } from '@/components/help/HelpTooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,6 +44,7 @@ import {
 } from 'lucide-react';
 import { TASK_TYPES, TASK_STATUS } from '@/lib/constants';
 import { PRIORITIES } from '@/lib/workflow-constants';
+import { HelpTooltip } from '@/components/help/HelpTooltip';
 
 type Task = Database['public']['Tables']['corporate_matter_tasks']['Row'];
 type MatterLite = { id: string; matter_number: string; subject: string | null };
@@ -334,7 +333,6 @@ export default function TasksPage() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <HelpButton variant="inline" articleId="tasks" label="Help" />
             <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={openCreate} data-tour="tasks-new">
               <Plus className="h-4 w-4 mr-2" />
               New Task
@@ -613,7 +611,10 @@ export default function TasksPage() {
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5">
                   Priority
-                  <HelpTooltip id="task-priority" />
+                  <HelpTooltip
+                    title="Task Priority"
+                    content="Low, Medium, High or Urgent. Priority helps you and your team see which tasks matter most across the register."
+                  />
                 </Label>
                 <Select
                   value={form.priority}
@@ -635,7 +636,10 @@ export default function TasksPage() {
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5">
                   Status
-                  <HelpTooltip id="task-status" />
+                  <HelpTooltip
+                    title="Task Status"
+                    content="Move a task from Pending to In Progress to Completed as you work. Completing a task records the completion date automatically."
+                  />
                 </Label>
                 <Select
                   value={form.status}

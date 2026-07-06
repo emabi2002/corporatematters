@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { createClient } from '@/lib/supabase';
-import { HelpButton } from '@/components/help/HelpButton';
 import { format, subDays, subMonths, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays, eachMonthOfInterval } from 'date-fns';
 import {
   BarChart3,
@@ -529,7 +528,6 @@ export default function ReportsPage() {
               <Printer className="h-4 w-4 mr-1.5" />
               Print
             </Button>
-            <HelpButton variant="inline" articleId="reports" label="Help" />
           </div>
         </div>
 
